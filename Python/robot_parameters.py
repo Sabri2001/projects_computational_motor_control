@@ -70,22 +70,33 @@ class RobotParameters(dict):
 
     def set_frequencies(self, parameters):
         """Set frequencies"""
-        pylog.warning(
-            'Set the frequencies of the spinal and limb oscillators as a function of the drive')
+        self.frequencies = 2.0*np.ones(self.n_oscillators)
+        return self.frequencies
 
     def set_coupling_weights(self, parameters):
         """Set coupling weights"""
-        pylog.warning('Coupling weights must be set')
+        for i in range(self.n_body_joints):
+            self.coupling_weights[i,i+1] = 10.0 #parameters.axial_weights
+            self.coupling_weights[i+1,i] = 10.0
+            self.coupling_weights[i,i+8] = 10.0
+            self.coupling_weights[i+8,i] = 10.0 # parameters.contralateral_weights
+        return self.coupling_weights
 
     def set_phase_bias(self, parameters):
         """Set phase bias"""
-        pylog.warning('Phase bias must be set')
+        for i in range(self.n_body_joints):
+            self.phase_bias[i,i+1] = -2*np.pi/8
+            self.phase_bias[i+1,i] = 2*np.pi/8
+            self.phase_bias[i,i+8] = np.pi
+            self.phase_bias[i+8,i] = np.pi
+        return  self.phase_bias
 
     def set_amplitudes_rate(self, parameters):
         """Set amplitude rates"""
-        pylog.warning('Convergence rates must be set')
+        self.amplitudes_rate = 20.0*np.ones(self.n_oscillators)
+        return self.amplitudes_rate
 
     def set_nominal_amplitudes(self, parameters):
         """Set nominal amplitudes"""
-        pylog.warning('Nominal amplitudes must be set')
-
+        self.nominal_amplitudes = 1.0*np.ones(self.n_oscillators)
+        return self.nominal_amplitudes

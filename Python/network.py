@@ -5,7 +5,7 @@ from scipy.integrate import ode
 from robot_parameters import RobotParameters
 
 
-def network_ode(_time, state, robot_parameters, loads, contact_sens):
+def network_ode(_time, state, robot_parameters : RobotParameters, loads, contact_sens):
     """Network_ODE
 
     Parameters
@@ -28,8 +28,29 @@ def network_ode(_time, state, robot_parameters, loads, contact_sens):
     n_oscillators = robot_parameters.n_oscillators
     phases = state[:n_oscillators]
     amplitudes = state[n_oscillators:2*n_oscillators]
+
+    freq = robot_parameters.frequencies
+    amplitudes_rate = robot_parameters.amplitudes_rate
+    nominal_amplitudes = robot_parameters.nominal_amplitudes
+
     # Implement equation here
-    return np.concatenate([np.zeros_like(phases), np.zeros_like(amplitudes)])
+    dtheta = np.zeros(n_oscillators)
+    print(n_oscillators)
+    
+    for i in range(n_oscillators):
+        dtheta[i] = 2*np.pi*freq[i]
+        w = robot_parameters.set_coupling_weights(i)
+        phi = robot_parameters.set_phase_bias(i)
+        for j in range(n_oscillators):
+            dtheta[i] += amplitudes[j]*w[i,j] *np.sin(phases[j]-phases[i]-phi[i,j])
+    
+    dr = np.zeros(n_oscillators)
+    print(np.size(amplitudes_rate))
+    print(np.size(dr))
+    for k in range(n_oscillators):
+        dr[k] = amplitudes_rate[k]*(nominal_amplitudes[k]-amplitudes[k])
+    
+    return np.concatenate([dtheta, dr])
 
 
 def motor_output(phases, amplitudes, iteration):
@@ -51,20 +72,30 @@ def motor_output(phases, amplitudes, iteration):
     # Last 4 oscillators define output of each limb.
     # Each limb has 2 degree of freedom
     # Implement equation here
+    q_body = np.zeros(8)
+    for i in range(8):
+        q_body[i] = amplitudes[i]*(1+np.cos(phases[i])) - amplitudes[i+8]*(1+np.cos(phases[i+8]))
+
+    q_shoulder = np.zeros(4)
+    q_wrist = np.zeros(4)
+    for i in range(4):
+        q_shoulder[i] = amplitudes[i+16]*np.cos(phases[i+16])
+        q_wrist[i] = amplitudes[i+16]*np.sin(phases[i+16])
+
     # 16 + 4 oscillators
     # spine motors: 8 -> Mapped from phases[:8] & phases[8:16] and amplitudes[:8] & amplitudes[8:16]
     # leg motors: 8 -> Mapped from phases[16:20] and amplitudes[16:20] with cos(shoulder) & sin(wrist) for each limb
     # output -> spine output for motor (head to tail) + leg output (Front Left
     # shoulder, Front Left wrist, Front Right, Hind Left, Hind right)
-    phases = np.append(
-        np.zeros_like(phases)[
-            :16], np.zeros_like(phases)[
-            16:20])
-    amplitudes = np.append(
-        np.zeros_like(amplitudes)[
-            :16], np.zeros_like(amplitudes)[
-            16:20])
-    return np.zeros(8+8)
+    # phases = np.append(
+    #    np.zeros_like(phases)[
+    #        :16], np.zeros_like(phases)[
+    #        16:20])
+    # amplitudes = np.append(
+    #    np.zeros_like(amplitudes)[
+    #        :16], np.zeros_like(amplitudes)[
+    #        16:20])
+    return np.concatenate([q_body,q_shoulder,q_wrist])
 
 
 class SalamandraNetwork:
@@ -100,7 +131,8 @@ class SalamandraNetwork:
     def outputs(self, iteration=None):
         """Oscillator outputs"""
         # Implement equation here
-        return np.zeros(12)
+        output = self.state.amplitude(iteration=iteration)*(1+np.cos(self.state.phases(iteration=iteration)))
+        return output
 
     def get_motor_position_output(self, iteration=None):
         """Get motor position"""

@@ -62,8 +62,8 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
     outputs_log[0, :] = network.get_motor_position_output(iteration=0)
 
     # comment below pass to run file
-    pylog.warning('Remove the pass to run your code!!')
-    pass
+    # pylog.warning('Remove the pass to run your code!!')
+    # pass
 
     pylog.warning(
         'Implement plots here, try to plot the various logged data to check the implementation')
