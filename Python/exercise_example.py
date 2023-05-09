@@ -13,17 +13,18 @@ def exercise_example(timestep):
     # Parameters
     parameter_set = [
         SimulationParameters(
-            duration=10,  # Simulation duration in [s]
+            duration=60,  # Simulation duration in [s]
             timestep=timestep,  # Simulation timestep in [s]
             spawn_position=[0, 0, 0.1],  # Robot position in [m]
             spawn_orientation=[0, 0, 0],  # Orientation in Euler angles [rad]
-            drive=drive,  # An example of parameter part of the grid search
-            amplitudes=[1, 2, 3],  # Just an example
+            # drive=drive,  # An example of parameter part of the grid search
+            drive = 2,
+            amplitudes=[1, 2, 3],  # Just an example -> DON'T KNOW WHAT STANDS FOR
             phase_lag_body=0,  # or np.zeros(n_joints) for example
             turn=0,  # Another example
             # ...
         )
-        for drive in np.linspace(3, 4, 2)
+        # for drive in np.linspace(3, 4, 2)
         # for amplitudes in ...
         # for ...
     ]
@@ -34,10 +35,10 @@ def exercise_example(timestep):
         filename = './logs/example/simulation_{}.{}'
         sim, data = simulation(
             sim_parameters=sim_parameters,  # Simulation parameters, see above
-            arena='land',  # Can also be 'land', give it a try!
-            # fast=True,  # For fast mode (not real-time)
-            # headless=True,  # For headless mode (No GUI, could be faster)
-            record=True,  # Record video
+            arena='land',  # Can also be 'water'
+            #fast=True,  # For fast mode (not real-time)
+            #headless=True,  # For headless mode (No GUI, could be faster)
+            record=False,  # Record video
             record_path="videos/test_video_drive_" + \
             str(simulation_i),  # video savging path
             camera_id=2  # camera type: 0=top view, 1=front view, 2=side view,

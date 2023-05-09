@@ -35,7 +35,7 @@ class SalamandraState:
     @classmethod
     def salamandra_robot(cls, n_iterations):
         """State of Salamandra robot"""
-        return cls(array=np.zeros([n_iterations, 2*20]))
+        return cls(array=np.zeros([n_iterations, 2*20])) # cls: reference to class itself, this instantiates class element
 
     def phases(self, iteration=None):
         """Oscillator phases"""

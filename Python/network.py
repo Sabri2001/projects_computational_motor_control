@@ -29,28 +29,28 @@ def network_ode(_time, state, robot_parameters : RobotParameters, loads, contact
     phases = state[:n_oscillators]
     amplitudes = state[n_oscillators:2*n_oscillators]
 
-    freq = robot_parameters.frequencies
-    amplitudes_rate = robot_parameters.amplitudes_rate
-    nominal_amplitudes = robot_parameters.nominal_amplitudes
+    freq = robot_parameters.freqs # nu
+    amplitudes_rate = robot_parameters.amplitudes_rate # a
+    nominal_amplitudes = robot_parameters.nominal_amplitudes # R
+    weights = robot_parameters.coupling_weights # w
+    phi = robot_parameters.phase_bias # phi
 
     # Implement equation here
-    dtheta = np.zeros(n_oscillators)
-    print(n_oscillators)
+    dphase = np.zeros(n_oscillators) # init dphase
+    # print(n_oscillators)
     
     for i in range(n_oscillators):
-        dtheta[i] = 2*np.pi*freq[i]
-        w = robot_parameters.set_coupling_weights(i)
-        phi = robot_parameters.set_phase_bias(i)
+        dphase[i] = 2*np.pi*freq[i]
         for j in range(n_oscillators):
-            dtheta[i] += amplitudes[j]*w[i,j] *np.sin(phases[j]-phases[i]-phi[i,j])
+            dphase[i] += amplitudes[j]*weights[i,j]*np.sin(phases[j]-phases[i]-phi[i,j])
     
-    dr = np.zeros(n_oscillators)
-    print(np.size(amplitudes_rate))
-    print(np.size(dr))
+    dr = np.zeros(n_oscillators) # init dr
+    # print(np.size(amplitudes_rate))
+    # print(np.size(dr))
     for k in range(n_oscillators):
         dr[k] = amplitudes_rate[k]*(nominal_amplitudes[k]-amplitudes[k])
     
-    return np.concatenate([dtheta, dr])
+    return np.concatenate([dphase, dr])
 
 
 def motor_output(phases, amplitudes, iteration):
@@ -76,11 +76,10 @@ def motor_output(phases, amplitudes, iteration):
     for i in range(8):
         q_body[i] = amplitudes[i]*(1+np.cos(phases[i])) - amplitudes[i+8]*(1+np.cos(phases[i+8]))
 
-    q_shoulder = np.zeros(4)
-    q_wrist = np.zeros(4)
-    for i in range(4):
-        q_shoulder[i] = amplitudes[i+16]*np.cos(phases[i+16])
-        q_wrist[i] = amplitudes[i+16]*np.sin(phases[i+16])
+    q_leg = np.array([])
+    for i in [16,18,17,19]: # so that commands respect required order, see a few lines lower
+        q_leg = np.append(q_leg,amplitudes[i]*np.cos(phases[i])) # shoulder
+        q_leg = np.append(q_leg,amplitudes[i]*np.sin(phases[i])) # wrist
 
     # 16 + 4 oscillators
     # spine motors: 8 -> Mapped from phases[:8] & phases[8:16] and amplitudes[:8] & amplitudes[8:16]
@@ -95,7 +94,7 @@ def motor_output(phases, amplitudes, iteration):
     #    np.zeros_like(amplitudes)[
     #        :16], np.zeros_like(amplitudes)[
     #        16:20])
-    return np.concatenate([q_body,q_shoulder,q_wrist])
+    return np.concatenate([q_body,q_leg])
 
 
 class SalamandraNetwork:
@@ -109,8 +108,9 @@ class SalamandraNetwork:
         # Parameters
         self.robot_parameters = RobotParameters(sim_parameters)
         # Set initial state
-        # Replace your oscillator phases here
-        self.state.set_phases(
+        # Replace your oscillator phases here (rather, initial value)
+        np.random.seed(0)
+        self.state.set_phases( # set_phases: writes phases of this iteration into state array
             iteration=0,
             value=1e-4*np.random.rand(self.robot_parameters.n_oscillators),
         )
@@ -130,7 +130,7 @@ class SalamandraNetwork:
 
     def outputs(self, iteration=None):
         """Oscillator outputs"""
-        # Implement equation here
+        # Implement equation here TODO: WHAT IS THIS??
         output = self.state.amplitude(iteration=iteration)*(1+np.cos(self.state.phases(iteration=iteration)))
         return output
 
@@ -142,4 +142,3 @@ class SalamandraNetwork:
             iteration=iteration,
         )
         return oscillator_output
-
