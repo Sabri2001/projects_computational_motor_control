@@ -75,6 +75,7 @@ class RobotParameters(dict): # inherits from dict class
         # Body oscillators, left side
         for i in range(int(self.n_oscillators_body/2)):
             if i != self.n_oscillators_body/2-1: # not at the end of the spinal cord
+                # CLARIFY CONVENTION??
                 self.phase_bias[i,i+1] = -2*pi/8 #parameters.axial_weights
                 self.phase_bias[i+1,i] = 2*pi/8
             self.phase_bias[i,i+self.n_body_joints] = pi # parameters.contralateral_weights
@@ -174,4 +175,4 @@ class RobotParameters(dict): # inherits from dict class
 
     def set_amplitudes_rate(self, parameters):
         """Set amplitude rates"""
-        self.amplitudes_rate = 2.0*np.ones(self.n_oscillators)
+        self.amplitudes_rate = 20.0*np.ones(self.n_oscillators)

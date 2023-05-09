@@ -18,6 +18,12 @@ def exercise_2a_swim(timestep):
     oscillators.
     """
     # Use exercise_example.py for reference
+
+    # PERSONAL NOTES
+    # phase lag: now 2pi/8 => 8 oscillators form complete S-shape, check in papers whether go for fewer or more
+    # drive: 3 to 5
+    # check speed/torque + energy? they ask for quantity representing both speed/power at same time, eg ratio?
+    # check lecture notes/papers?
     pass
     return
 
@@ -32,6 +38,11 @@ def exercise_2b_walk(timestep):
     oscillators.
     """
     # Use exercise_example.py for reference
+
+    # PERSONAL NOTES
+    # phase lag: now 2pi/8 => 8 oscillators form complete S-shape, check in papers whether go for fewer or more
+    # Q: not supposed to try changing with drive are we? cf. supp material
+    # drive: 1 to 3
     pass
     return
 
@@ -39,6 +50,11 @@ def exercise_2b_walk(timestep):
 def exercise_test_walk(timestep):
     "[Project 1] Q2 Swimming"
     # Use exercise_example.py for reference
+
+    # PERSONAL NOTES:
+    # Q: just describe qualitatively? or also grid search?
+    # Q: what's the diff between this function (+ below) with those above?
+
     pass
     return
 

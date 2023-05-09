@@ -126,12 +126,12 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
     # plt.legend()
 
     # # Plotting the motor position outputs -> WHAT DOES X IN FIGURES CORRESP TO? q?
-    # plt.figure()
-    # plt.plot(times, outputs_log[:, 0], label='Spine motor')
-    # plt.plot(times, outputs_log[:, 8], label='Limb shoulder motor')
-    # plt.xlabel('Time')
-    # plt.ylabel('Motor Position')
-    # plt.legend()
+    plt.figure()
+    plt.plot(times, outputs_log[:, 0], label='Spine motor')
+    plt.plot(times, outputs_log[:, 8], label='Limb shoulder motor')
+    plt.xlabel('Time')
+    plt.ylabel('Motor Position')
+    plt.legend()
 
     # # Plotting the frequencies
     # plt.figure()
@@ -177,4 +177,4 @@ def exercise_1a_networks(plot, timestep=1e-2):
 
 
 if __name__ == '__main__':
-    exercise_1a_networks(plot=not save_plots())
+    exercise_1a_networks(plot=not save_plots    ())
