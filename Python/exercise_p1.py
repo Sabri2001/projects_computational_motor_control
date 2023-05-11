@@ -30,6 +30,7 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
         drive=drive,
         amplitude_gradient=None,
         phase_lag_body=2*pi/8,
+        phase_lag_body_limb = 0.0,
         turn=None,
     )
     pylog.warning(

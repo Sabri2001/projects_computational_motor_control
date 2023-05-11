@@ -40,6 +40,7 @@ class RobotParameters(dict): # inherits from dict class
 
         # our additions
         self.phase_lag_body = parameters.phase_lag_body
+        self.phase_lag_body_limb = parameters.phase_lag_body_limb
 
         self.update(parameters)
 
@@ -106,10 +107,10 @@ class RobotParameters(dict): # inherits from dict class
                 self.phase_bias[i+1,i] = pi
 
         # Connections from limb to spine (strong)
-        self.phase_bias[0:4,16] = 0.0
-        self.phase_bias[4:8,17] = 0.0
-        self.phase_bias[8:12,18] = 0.0
-        self.phase_bias[12:16,19] = 0.0
+        self.phase_bias[0:4,16] = self.phase_lag_body_limb
+        self.phase_bias[4:8,17] = self.phase_lag_body_limb
+        self.phase_bias[8:12,18] = self.phase_lag_body_limb
+        self.phase_bias[12:16,19] = self.phase_lag_body_limb
 
     def set_coupling_weights(self, parameters):
         """Set phase bias"""

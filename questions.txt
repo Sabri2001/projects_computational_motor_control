@@ -2,9 +2,17 @@
 - 30 limb projected to all?
 - why backward walk?
 - simu_param (exo_ex) -> ampli?
+
 - k changes -> should change weights pi limb-spine too (esp for walking)?
 - exo2: ".._test" fun, for what?
 - exo2.3: qualitative or grid search? phase_lag => just phi1-phi2 (in exo1)?
 - exo2: where links_vel?
 - how to stop simu entirely?
 - plot_results: what is plot 2D for? grid search results?
+- exo2: metrics -> energy ok? or ratio perhaps?
+
+- exo3.1: compare to body deform -> wtf?
+- exo3.1: uncertainty in plot no sense does it?
+- exo3.1: for phase_lag 2 goes backward, not so in paper normal?
+- exo3.2: ditch fixed dependency drive - body ampli?
+- otherwise other param (connection weights...) cst?

@@ -36,19 +36,19 @@ def exercise_2a_swim(timestep):
             drive = 4,
             # amplitudes=[1, 2, 3],  # Just an example -> don't know what stands for, nominal ampli?, not used now
             phase_lag_body=pi/8,  # or np.zeros(n_joints) for example
+            phase_lag_body_limb = 0.0,
             # turn=0,  # Another example -> no used now
             # ...
         )
         # QUESTION: should respect range/step papers? if so pb...
         # for drive in np.linspace(3, 5, 4)
-        # for phase_lag_body in np.linspace(0.5,1.5,3)
-        # for amplitudes in ...
+        # for phase_lag_body in np.linspace(pi/8,3*pi/8,pi/8)
     ]
 
     # Grid search
-    os.makedirs('./logs/exo2/', exist_ok=True)
+    os.makedirs('./logs/exo2a/', exist_ok=True)
     for simulation_i, sim_parameters in enumerate(parameter_set):
-        filename = './logs/exo2/simulation_{}.{}'
+        filename = './logs/exo2a/simulation_{}.{}'
         sim, data = simulation(
             sim_parameters=sim_parameters,  # Simulation parameters, see above
             arena='water',  # Can also be 'water'
@@ -84,7 +84,45 @@ def exercise_2b_walk(timestep):
     # Q: not supposed to try changing with drive are we? cf. supp material
     # drive: 1 to 3
 
-    pass
+    parameter_set = [
+        SimulationParameters(
+            duration=10,  # Simulation duration in [s]
+            timestep=timestep,  # Simulation timestep in [s]
+            spawn_position=[0, 0, 0.1],  # Robot position in [m]
+            spawn_orientation=[0, 0, 0],  # Orientation in Euler angles [rad]
+            # drive=drive,  # An example of parameter part of the grid search
+            drive = 2,
+            # amplitudes=[1, 2, 3],  # Just an example -> don't know what stands for, nominal ampli?, not used now
+            phase_lag_body=pi/8,  # or np.zeros(n_joints) for example
+            phase_lag_body_limb = 0.0,
+            # turn=0,  # Another example -> no used now
+            # ...
+        )
+        # QUESTION: should respect range/step papers? if so pb...
+        # for drive in np.linspace(3, 5, 4)
+        # for phase_lag_body in np.linspace(pi/8,3*pi/8,pi/8)
+    ]
+
+    # Grid search
+    os.makedirs('./logs/exo2b/', exist_ok=True)
+    for simulation_i, sim_parameters in enumerate(parameter_set):
+        filename = './logs/exo2b/simulation_{}.{}'
+        sim, data = simulation(
+            sim_parameters=sim_parameters,  # Simulation parameters, see above
+            arena='land',  # Can also be 'water'
+            #fast=True,  # For fast mode (not real-time)
+            #headless=True,  # For headless mode (No GUI, could be faster)
+            record=False,  # Record video
+            record_path="videos/test_video_drive_" + \
+            str(simulation_i),  # video savging path
+            camera_id=2  # camera type: 0=top view, 1=front view, 2=side view,
+        )
+        # Log robot data
+        # Uncomment if wanna save
+        # data.to_file(filename.format(simulation_i, 'h5'), sim.iteration)
+        # # Log simulation parameters
+        # with open(filename.format(simulation_i, 'pickle'), 'wb') as param_file:
+        #     pickle.dump(sim_parameters, param_file)
     return
 
 
