@@ -141,28 +141,74 @@ def sum_torques(joints_data):
 
 def main(plot=True):
     """Main"""
+    """
     # Load data - an example of how to do this is provided in the commented text below
-    # data = SalamandraData.from_file('simulation_0.h5')
-    # with open('simulation_0.pickle', 'rb') as param_file:
-    #     parameters = pickle.load(param_file)
-    # timestep = data.timestep
-    # n_iterations = np.shape(data.sensors.links.array)[0]
-    # times = np.arange(
-    #     start=0,
-    #     stop=timestep*n_iterations,
-    #     step=timestep,
-    # )
-    # timestep = times[1] - times[0]
+    data = SalamandraData.from_file('simulation_0.h5')
+    with open('simulation_0.pickle', 'rb') as param_file:
+        parameters = pickle.load(param_file)
+    timestep = data.timestep
+    n_iterations = np.shape(data.sensors.links.array)[0]
+    times = np.arange(
+        start=0,
+        stop=timestep*n_iterations,
+        step=timestep,
+    )
+    timestep = times[1] - times[0]
     # amplitudes = parameters.amplitudes
-    # phase_lag_body = parameters.phase_lag_body
-    # osc_phases = data.state.phases()
-    # osc_amplitudes = data.state.amplitudes()
-    # links_positions = data.sensors.links.urdf_positions()
-    # head_positions = links_positions[:, 0, :]
-    # tail_positions = links_positions[:, 8, :]
-    # joints_positions = data.sensors.joints.positions_all()
-    # joints_velocities = data.sensors.joints.velocities_all()
-    # joints_torques = data.sensors.joints.motor_torques_all()
+    phase_lag_body = parameters.phase_lag_body
+    osc_phases = data.state.phases()
+    osc_amplitudes = data.state.amplitudes()
+    links_positions = data.sensors.links.urdf_positions()
+    head_positions = links_positions[:, 0, :]
+    tail_positions = links_positions[:, 8, :]
+    joints_positions = data.sensors.joints.positions_all()
+    joints_velocities = data.sensors.joints.velocities_all()
+    joints_torques = data.sensors.joints.motor_torques_all()
+
+    # Notes:
+    # For the links arrays: positions[iteration, link_id, xyz]
+    # For the positions arrays: positions[iteration, xyz]
+    # For the joints arrays: positions[iteration, joint]
+
+    # Plot data
+    head_positions = np.asarray(head_positions)
+    plt.figure('Positions')
+    plot_positions(times, head_positions)
+    plt.figure('Trajectory')
+    plot_trajectory(head_positions)
+    """
+
+    # Load data - an example of how to do this is provided in the commented text below
+    file_name = './logs/exo2/simulation_0'
+    data = SalamandraData.from_file(file_name+'.h5')
+    with open(file_name+'.pickle', 'rb') as param_file:
+        parameters = pickle.load(param_file)
+    timestep = data.timestep
+    n_iterations = np.shape(data.sensors.links.array)[0]
+    times = np.arange(
+        start=0,
+        stop=timestep*n_iterations,
+        step=timestep,
+    )
+    timestep = times[1] - times[0]
+    # amplitudes = parameters.amplitudes
+    phase_lag_body = parameters.phase_lag_body
+    osc_phases = data.state.phases()
+    osc_amplitudes = data.state.amplitudes()
+    links_positions = data.sensors.links.urdf_positions()
+    head_positions = links_positions[:, 0, :]
+    tail_positions = links_positions[:, 8, :]
+    joints_positions = data.sensors.joints.positions_all()
+    joints_velocities = data.sensors.joints.velocities_all()
+    joints_torques = data.sensors.joints.motor_torques_all()
+
+    # Metrics (scalar)
+    # Note: use dir() to know metrics than can be applied to object
+    print("Total torque: ", sum_torques(joints_torques))
+    # print("Mean speed: ", compute_speed(links_positions, links)) -> MISSING LINK_VEL
+
+    # Tests
+    print("phase_lag: ", phase_lag_body)
 
     # Notes:
     # For the links arrays: positions[iteration, link_id, xyz]
@@ -176,6 +222,9 @@ def main(plot=True):
     # plt.figure('Trajectory')
     # plot_trajectory(head_positions)
 
+    # # Our plots
+    # sum_torques = 
+
     # Show plots
     if plot:
         plt.show()
@@ -184,5 +233,5 @@ def main(plot=True):
 
 
 if __name__ == '__main__':
-    main(plot=save_plots())
-
+    # main(plot=save_plots()) -> that's for saving plots
+    main(plot=False)

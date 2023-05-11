@@ -9,6 +9,7 @@ from salamandra_simulation.parse_args import save_plots
 from salamandra_simulation.save_figures import save_figures
 from simulation_parameters import SimulationParameters
 from network import SalamandraNetwork
+from math import pi
 
 
 def run_network(duration, update=False, drive=0, timestep=1e-2):
@@ -28,7 +29,7 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
     sim_parameters = SimulationParameters(
         drive=drive,
         amplitude_gradient=None,
-        phase_lag_body=None,
+        phase_lag_body=2*pi/8,
         turn=None,
     )
     pylog.warning(
@@ -48,6 +49,7 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
         len(network.state.phases(iteration=0))
     ])
     phases_log[0, :] = network.state.phases(iteration=0)
+
     amplitudes_log = np.zeros([
         n_iterations,
         len(network.state.amplitudes(iteration=0))
@@ -64,11 +66,18 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
         len(network.robot_parameters.freqs)
     ])
     freqs_log[0, :] = network.robot_parameters.freqs
+
     outputs_log = np.zeros([
         n_iterations,
         len(network.get_motor_position_output(iteration=0))
     ])
     outputs_log[0, :] = network.get_motor_position_output(iteration=0)
+
+    outputs = np.zeros([
+        n_iterations,
+        len(network.outputs(iteration=0))
+    ])
+    outputs[0, :] = network.outputs(iteration=0)
 
     # comment below pass to run file
     # pylog.warning('Remove the pass to run your code!!')
@@ -91,6 +100,7 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
         amplitude_rates_log[i+1, :] = network.robot_parameters.nominal_amplitudes
         outputs_log[i+1, :] = network.get_motor_position_output(iteration=i+1)
         freqs_log[i+1, :] = network.robot_parameters.freqs
+        outputs[i+1, :] = network.outputs(iteration=i+1)
     toc = time.time()
 
     # Network performance
@@ -125,12 +135,20 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
     # plt.ylabel('Nominal amplitude')
     # plt.legend()
 
-    # # Plotting the motor position outputs -> WHAT DOES X IN FIGURES CORRESP TO? q?
+    # # Plotting the motor position outputs
+    # plt.figure()
+    # plt.plot(times, outputs_log[:, 0], label='Spine motor')
+    # plt.plot(times, outputs_log[:, 8], label='Limb shoulder motor')
+    # plt.xlabel('Time')
+    # plt.ylabel('Motor Position')
+    # plt.legend()
+
+    # Plot x
     plt.figure()
-    plt.plot(times, outputs_log[:, 0], label='Spine motor')
-    plt.plot(times, outputs_log[:, 8], label='Limb shoulder motor')
+    plt.plot(times, outputs_log[:, 0], label='Spine')
+    plt.plot(times, outputs_log[:, 8], label='Limb')
     plt.xlabel('Time')
-    plt.ylabel('Motor Position')
+    plt.ylabel('X')
     plt.legend()
 
     # # Plotting the frequencies
@@ -143,22 +161,22 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
 
     # Plot for visualising walking/swimming patterns
     # => artificially offset curves + only show spine motors
-    plt.figure()
-    # 8 spine command plots
-    plt.plot(times, outputs_log[:, 0],'b',label='Motor0')
-    plt.plot(times, outputs_log[:, 1]-2,'b', label='Motor1')
-    plt.plot(times, outputs_log[:, 2]-4,'b', label='Motor2')
-    plt.plot(times, outputs_log[:, 3]-6,'b', label='Motor3')
-    plt.plot(times, outputs_log[:, 4]-8,'g', label='Motor4')
-    plt.plot(times, outputs_log[:, 5]-10,'g', label='Motor5')
-    plt.plot(times, outputs_log[:, 6]-12,'g', label='Motor6')
-    plt.plot(times, outputs_log[:, 7]-14,'g', label='Motor7')
-    # red lines for gait visualisation
-    plt.plot(np.array([13.79,13.99,14.88,15.09]),np.array([0.74,-5.33,-7.26,-13.28]),'r')
-    plt.plot(np.array([24.37,25.23]),np.array([0.87,-13.13]),'r')
-    plt.xlabel('Time')
-    plt.ylabel('Motor Position')
-    plt.legend()
+    # plt.figure()
+    # # 8 spine command plots
+    # plt.plot(times, outputs_log[:, 0],'b',label='Motor0')
+    # plt.plot(times, outputs_log[:, 1]-2,'b', label='Motor1')
+    # plt.plot(times, outputs_log[:, 2]-4,'b', label='Motor2')
+    # plt.plot(times, outputs_log[:, 3]-6,'b', label='Motor3')
+    # plt.plot(times, outputs_log[:, 4]-8,'g', label='Motor4')
+    # plt.plot(times, outputs_log[:, 5]-10,'g', label='Motor5')
+    # plt.plot(times, outputs_log[:, 6]-12,'g', label='Motor6')
+    # plt.plot(times, outputs_log[:, 7]-14,'g', label='Motor7')
+    # # red lines for gait visualisation
+    # plt.plot(np.array([13.79,13.99,14.88,15.09]),np.array([0.74,-5.33,-7.26,-13.28]),'r')
+    # plt.plot(np.array([24.37,25.23]),np.array([0.87,-13.13]),'r')
+    # plt.xlabel('Time')
+    # plt.ylabel('Motor Position')
+    # plt.legend()
 
     return
 
@@ -166,7 +184,7 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
 def exercise_1a_networks(plot, timestep=1e-2):
     """[Project 1] Exercise 1: """
 
-    run_network(duration=40, update=True)
+    run_network(duration=10, update=True)
 
     # Show plots
     if plot:

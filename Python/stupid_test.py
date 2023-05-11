@@ -1,4 +1,4 @@
 import numpy as np
 
-arr = np.zeros(4)
-print(np.append(arr,1))
+arr = np.linspace(3,5,4)
+print(arr)

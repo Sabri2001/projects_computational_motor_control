@@ -20,7 +20,7 @@ def exercise_example(timestep):
             # drive=drive,  # An example of parameter part of the grid search
             drive = 2,
             # amplitudes=[1, 2, 3],  # Just an example -> don't know what stands for, not used now
-            # phase_lag_body=0,  # or np.zeros(n_joints) for example -> not used now
+            phase_lag_body=2*pi/8,  # or np.zeros(n_joints) for example
             # turn=0,  # Another example -> no used now
             # ...
         )

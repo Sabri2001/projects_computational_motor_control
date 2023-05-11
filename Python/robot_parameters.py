@@ -38,6 +38,9 @@ class RobotParameters(dict): # inherits from dict class
         self.position_body_gain = parameters.position_body_gain
         self.position_limb_gain = parameters.position_limb_gain
 
+        # our additions
+        self.phase_lag_body = parameters.phase_lag_body
+
         self.update(parameters)
 
     def update(self, parameters):
@@ -76,16 +79,16 @@ class RobotParameters(dict): # inherits from dict class
         for i in range(int(self.n_oscillators_body/2)):
             if i != self.n_oscillators_body/2-1: # not at the end of the spinal cord
                 # CLARIFY CONVENTION??
-                self.phase_bias[i,i+1] = -2*pi/8 #parameters.axial_weights
-                self.phase_bias[i+1,i] = 2*pi/8
+                self.phase_bias[i,i+1] = -self.phase_lag_body #parameters.axial_weights
+                self.phase_bias[i+1,i] = self.phase_lag_body
             self.phase_bias[i,i+self.n_body_joints] = pi # parameters.contralateral_weights
             self.phase_bias[i+self.n_body_joints,i] = pi
 
         # Body oscillators, right side
         for i in range(int(self.n_oscillators_body/2), self.n_oscillators_body):
             if i != self.n_oscillators_body-1: # not at the end of the spinal cord
-                self.phase_bias[i,i+1] = -2*pi/8
-                self.phase_bias[i+1,i] = 2*pi/8
+                self.phase_bias[i,i+1] = -self.phase_lag_body
+                self.phase_bias[i+1,i] = self.phase_lag_body
 
         # Limb oscillators, left side
         for i in range(self.n_oscillators_body, int(self.n_oscillators_body+self.n_legs_joints/2)):
