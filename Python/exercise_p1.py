@@ -128,29 +128,13 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
     # plt.ylabel('Amplitude')
     # plt.legend()
 
-    # # Plotting the nominal amplitudes: that's good
+    # # Plotting the nominal amplitudes
     # plt.figure()
     # plt.plot(times, amplitude_rates_log[:, 0], label='Body nominal amplitude')
     # plt.plot(times, amplitude_rates_log[:, 16], label='Limb nominal amplitude')
     # plt.xlabel('Times')
     # plt.ylabel('Nominal amplitude')
     # plt.legend()
-
-    # # Plotting the motor position outputs
-    # plt.figure()
-    # plt.plot(times, outputs_log[:, 0], label='Spine motor')
-    # plt.plot(times, outputs_log[:, 8], label='Limb shoulder motor')
-    # plt.xlabel('Time')
-    # plt.ylabel('Motor Position')
-    # plt.legend()
-
-    # Plot x
-    plt.figure()
-    plt.plot(times, outputs_log[:, 0], label='Spine')
-    plt.plot(times, outputs_log[:, 8], label='Limb')
-    plt.xlabel('Time')
-    plt.ylabel('X')
-    plt.legend()
 
     # # Plotting the frequencies
     # plt.figure()
@@ -160,24 +144,28 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
     # plt.ylabel('Frequency')
     # plt.legend()
 
-    # Plot for visualising walking/swimming patterns
-    # => artificially offset curves + only show spine motors
-    # plt.figure()
-    # # 8 spine command plots
-    # plt.plot(times, outputs_log[:, 0],'b',label='Motor0')
-    # plt.plot(times, outputs_log[:, 1]-2,'b', label='Motor1')
-    # plt.plot(times, outputs_log[:, 2]-4,'b', label='Motor2')
-    # plt.plot(times, outputs_log[:, 3]-6,'b', label='Motor3')
-    # plt.plot(times, outputs_log[:, 4]-8,'g', label='Motor4')
-    # plt.plot(times, outputs_log[:, 5]-10,'g', label='Motor5')
-    # plt.plot(times, outputs_log[:, 6]-12,'g', label='Motor6')
-    # plt.plot(times, outputs_log[:, 7]-14,'g', label='Motor7')
-    # # red lines for gait visualisation
-    # plt.plot(np.array([13.79,13.99,14.88,15.09]),np.array([0.74,-5.33,-7.26,-13.28]),'r')
-    # plt.plot(np.array([24.37,25.23]),np.array([0.87,-13.13]),'r')
-    # plt.xlabel('Time')
-    # plt.ylabel('Motor Position')
-    # plt.legend()
+    # Plotting oscillator outputs
+    # Note: artificially offset curves for visualising walking/swimming patterns
+    # Spine oscillators 0 to 7 (left side, head to tail)
+    plt.figure()
+    plt.plot(times, outputs[:, 0],'b',label='Osc_output0')
+    plt.plot(times, outputs[:, 1]-2,'b', label='Osc_output1')
+    plt.plot(times, outputs[:, 2]-4,'b', label='Osc_output2')
+    plt.plot(times, outputs[:, 3]-6,'b', label='Osc_output3')
+    plt.plot(times, outputs[:, 4]-8,'g', label='Osc_output4')
+    plt.plot(times, outputs[:, 5]-10,'g', label='Osc_output5')
+    plt.plot(times, outputs[:, 6]-12,'g', label='Osc_output6')
+    plt.plot(times, outputs[:, 7]-14,'g', label='Osc_output7')
+
+    # Front limbs (left then right)
+    plt.plot(times, outputs[:, 16]-18,'b',label='Osc_output16')
+    plt.plot(times, outputs[:, 18]-20,'g', label='Osc_output18')
+
+    # TODO: Red/dashed lines for visualisation
+
+    plt.xlabel('Time')
+    plt.ylabel('X')
+    plt.legend()
 
     return
 
@@ -185,7 +173,7 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
 def exercise_1a_networks(plot, timestep=1e-2):
     """[Project 1] Exercise 1: """
 
-    run_network(duration=10, update=True)
+    run_network(duration=40, update=True)
 
     # Show plots
     if plot:

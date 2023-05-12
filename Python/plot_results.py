@@ -12,6 +12,7 @@ from salamandra_simulation.parse_args import save_plots
 from salamandra_simulation.save_figures import save_figures
 from network import motor_output
 import matplotlib.colors as colors
+from math import pi
 
 
 def plot_positions(times, link_data):
@@ -41,7 +42,7 @@ def plot_2d(results, labels, n_data=300, log=False, cmap=None):
     labels - The labels should be a list of three string for the xlabel, the
     ylabel and zlabel (in that order).
 
-    n_data - Represents the number of points used along x and y to draw the plot
+    n_data - Represents the number of points used along x and y to draw the plot (interpolation)
 
     log - Set log to True for logarithmic scale.
 
@@ -76,6 +77,7 @@ def plot_2d(results, labels, n_data=300, log=False, cmap=None):
     plt.ylabel(labels[1])
     cbar = plt.colorbar()
     cbar.set_label(labels[2])
+    plt.show()
 
 
 def max_distance(link_data, nsteps_considered=None):
@@ -139,76 +141,39 @@ def sum_torques(joints_data):
     return np.sum(np.abs(joints_data[:, :]))
 
 
-def main(plot=True):
+def main(files, plot=True):
     """Main"""
-    """
-    # Load data - an example of how to do this is provided in the commented text below
-    data = SalamandraData.from_file('simulation_0.h5')
-    with open('simulation_0.pickle', 'rb') as param_file:
-        parameters = pickle.load(param_file)
-    timestep = data.timestep
-    n_iterations = np.shape(data.sensors.links.array)[0]
-    times = np.arange(
-        start=0,
-        stop=timestep*n_iterations,
-        step=timestep,
-    )
-    timestep = times[1] - times[0]
-    # amplitudes = parameters.amplitudes
-    phase_lag_body = parameters.phase_lag_body
-    osc_phases = data.state.phases()
-    osc_amplitudes = data.state.amplitudes()
-    links_positions = data.sensors.links.urdf_positions()
-    head_positions = links_positions[:, 0, :]
-    tail_positions = links_positions[:, 8, :]
-    joints_positions = data.sensors.joints.positions_all()
-    joints_velocities = data.sensors.joints.velocities_all()
-    joints_torques = data.sensors.joints.motor_torques_all()
 
-    # Notes:
-    # For the links arrays: positions[iteration, link_id, xyz]
-    # For the positions arrays: positions[iteration, xyz]
-    # For the joints arrays: positions[iteration, joint]
+    speed_vec  = []
+    for file_name in files:
+        # Load data
+        data = SalamandraData.from_file(file_name+'.h5')
+        with open(file_name+'.pickle', 'rb') as param_file:
+            parameters = pickle.load(param_file)
+        timestep = data.timestep
+        n_iterations = np.shape(data.sensors.links.array)[0]
+        times = np.arange(
+            start=0,
+            stop=timestep*n_iterations,
+            step=timestep,
+        )
+        # timestep = times[1] - times[0]
+        # amplitudes = parameters.amplitudes
+        # phase_lag_body = parameters.phase_lag_body
+        # osc_phases = data.state.phases()
+        # osc_amplitudes = data.state.amplitudes()
+        links_positions = np.array(data.sensors.links.urdf_positions())
+        links_vel = np.array(data.sensors.links.com_lin_velocities())
+        # head_positions = links_positions[:, 0, :]
+        # tail_positions = links_positions[:, 8, :]
+        # joints_positions = data.sensors.joints.positions_all() # check oscillation or ramp (for power)!
+        # joints_velocities = data.sensors.joints.velocities_all()
+        # joints_torques = data.sensors.joints.motor_torques_all()
 
-    # Plot data
-    head_positions = np.asarray(head_positions)
-    plt.figure('Positions')
-    plot_positions(times, head_positions)
-    plt.figure('Trajectory')
-    plot_trajectory(head_positions)
-    """
-
-    # Load data - an example of how to do this is provided in the commented text below
-    file_name = './logs/exo2/simulation_0'
-    data = SalamandraData.from_file(file_name+'.h5')
-    with open(file_name+'.pickle', 'rb') as param_file:
-        parameters = pickle.load(param_file)
-    timestep = data.timestep
-    n_iterations = np.shape(data.sensors.links.array)[0]
-    times = np.arange(
-        start=0,
-        stop=timestep*n_iterations,
-        step=timestep,
-    )
-    timestep = times[1] - times[0]
-    # amplitudes = parameters.amplitudes
-    phase_lag_body = parameters.phase_lag_body
-    osc_phases = data.state.phases()
-    osc_amplitudes = data.state.amplitudes()
-    links_positions = data.sensors.links.urdf_positions()
-    head_positions = links_positions[:, 0, :]
-    tail_positions = links_positions[:, 8, :]
-    joints_positions = data.sensors.joints.positions_all()
-    joints_velocities = data.sensors.joints.velocities_all()
-    joints_torques = data.sensors.joints.motor_torques_all()
-
-    # Metrics (scalar)
-    # Note: use dir() to know metrics than can be applied to object
-    print("Total torque: ", sum_torques(joints_torques))
-    # print("Mean speed: ", compute_speed(links_positions, links)) -> MISSING LINK_VEL
-
-    # Tests
-    print("phase_lag: ", phase_lag_body)
+        # Metrics (scalar)
+        # Note: use dir() to know metrics than can be applied to object
+        # print("Total torque: ", sum_torques(joints_torques))
+        speed_vec.append(compute_speed(links_positions, links_vel)[0]) # only axial speed here
 
     # Notes:
     # For the links arrays: positions[iteration, link_id, xyz]
@@ -222,16 +187,28 @@ def main(plot=True):
     # plt.figure('Trajectory')
     # plot_trajectory(head_positions)
 
-    # # Our plots
-    # sum_torques = 
+    # 2D plot for grid search (update drive values!!)
+    results = np.array([[i,j*0.5,0] for i in np.linspace(1,3,4) for j in range(1,4)])
+    results[:,2] = np.array(speed_vec)
+    print(results)
+    plot_2d(results,["Drive [-]","Wave number k [-]","Mean speed [m/s]"])
 
     # Show plots
-    if plot:
-        plt.show()
-    else:
-        save_figures()
+    # if plot:
+    #     plt.show()
+    # else:
+    #     save_figures()
+
+
+def test_2D():
+    results = np.array([[i,j*pi/8,0] for i in np.linspace(3,5,4) for j in range(1,4)])
+    results[:,2] = results[:,0] + results[:,1]
+    print(results)
+    plot_2d(results,["x","y","z"])
 
 
 if __name__ == '__main__':
     # main(plot=save_plots()) -> that's for saving plots
-    main(plot=False)
+    # file_names = [f'./logs/exo2a/simulation_{i}' for i in range(12)]
+    # file_names = [f'./logs/exo2b/simulation_{i}' for i in range(12)]
+    # main(files=file_names, plot=True)

@@ -1,4 +1,4 @@
-- output x = r(1+cos(theta))?
+- output x = r(1+cos(theta))? what is this x?
 - 30 limb projected to all?
 - why backward walk?
 - simu_param (exo_ex) -> ampli?
@@ -16,3 +16,8 @@
 - exo3.1: for phase_lag 2 goes backward, not so in paper normal?
 - exo3.2: ditch fixed dependency drive - body ampli?
 - otherwise other param (connection weights...) cst?
+
+- exo4: spine and limb phases, not x?
+- how to make land/water environment? transition/tilt? and how?
+
+- exo1: what to explain?

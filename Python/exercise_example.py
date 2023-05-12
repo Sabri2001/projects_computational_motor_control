@@ -5,6 +5,7 @@ import pickle
 import numpy as np
 from salamandra_simulation.simulation import simulation
 from simulation_parameters import SimulationParameters
+from math import pi
 
 
 def exercise_example(timestep):
@@ -37,8 +38,8 @@ def exercise_example(timestep):
         sim, data = simulation(
             sim_parameters=sim_parameters,  # Simulation parameters, see above
             arena='land',  # Can also be 'water'
-            #fast=True,  # For fast mode (not real-time)
-            #headless=True,  # For headless mode (No GUI, could be faster)
+            fast=True,  # For fast mode (not real-time)
+            headless=True,  # For headless mode (No GUI, could be faster)
             record=False,  # Record video
             record_path="videos/test_video_drive_" + \
             str(simulation_i),  # video savging path

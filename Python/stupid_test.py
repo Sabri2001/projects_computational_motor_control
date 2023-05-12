@@ -1,4 +1,4 @@
 import numpy as np
 
-arr = np.linspace(3,5,4)
-print(arr)
+file_names = [f'./logs/exo2a/simulation_{i}' for i in range(12)]
+print(file_names)
