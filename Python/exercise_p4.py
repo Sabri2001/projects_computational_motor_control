@@ -6,6 +6,7 @@ import numpy as np
 from salamandra_simulation.simulation import simulation
 from simulation_parameters import SimulationParameters
 import farms_pylog as pylog
+from math import pi
 
 
 def exercise_4a_transition(timestep):
@@ -39,24 +40,19 @@ def exercise_4a_transition(timestep):
     #     record=True,
     #     record_path='walk2swim',  # or swim2walk
     # )
+
     # Parameters
     parameter_set = [
         SimulationParameters(
-            duration=60,  # Simulation duration in [s]
+            duration=20,  # Simulation duration in [s]
             timestep=timestep,  # Simulation timestep in [s]
-            spawn_position=[4, 0, 0.0],  # Robot position in [m]
-            spawn_orientation=[0, 0, np.pi],  # Orientation in Euler angles [rad]
-            # drive=drive,  # An example of parameter part of the grid search
+            spawn_position=[-1, 0, 0.0],  # Robot position in [m]
+                # note: get into water at x = 0 m
+            spawn_orientation=[0, 0, pi/2],  # Orientation in Euler angles [rad]
             drive = 2,
-            # amplitudes=[1, 2, 3],  # Just an example -> don't know what stands for, not used now
             phase_lag_body=2*pi/8,  # or np.zeros(n_joints) for example
             phase_lag_body_limb = 0.0,
-            # turn=0,  # Another example -> no used now
-            # ...
         )
-        # for drive in np.linspace(3, 4, 2)
-        # for amplitudes in ...
-        # for ...
     ]
 
     # Grid search
@@ -65,22 +61,17 @@ def exercise_4a_transition(timestep):
         filename = './logs/example/simulation_{}.{}'
         sim, data = simulation(
             sim_parameters=sim_parameters,  # Simulation parameters, see above
-            arena='amphibious',  # Can also be 'water'
+            arena='amphibious',
             fast=True,  # For fast mode (not real-time)
-            headless=True,  # For headless mode (No GUI, could be faster)
+            headless=False,  # For headless mode (No GUI, could be faster)
             record=False,  # Record video
             record_path="videos/test_video_drive_" + \
             str(simulation_i),  # video savging path
-            camera_id=2  # camera type: 0=top view, 1=front view, 2=side view,
+            camera_id=0  # camera type: 0=top view, 1=front view, 2=side view,
         )
-        # Log robot data
-        data.to_file(filename.format(simulation_i, 'h5'), sim.iteration)
-        # Log simulation parameters
-        with open(filename.format(simulation_i, 'pickle'), 'wb') as param_file:
-            pickle.dump(sim_parameters, param_file)
+        # No need for logging
     return
 
 
 if __name__ == '__main__':
     exercise_4a_transition(timestep=1e-2)
-

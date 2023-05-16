@@ -41,11 +41,15 @@ class RobotParameters(dict): # inherits from dict class
         # our additions
         self.phase_lag_body = parameters.phase_lag_body
         self.phase_lag_body_limb = parameters.phase_lag_body_limb
+        self.drive = parameters.drive
+        self.avg_x = None
+        self.parameters = parameters
 
         self.update(parameters)
 
     def update(self, parameters):
         """Update network from parameters"""
+        self.set_drive(parameters)
         self.set_frequencies(parameters)  # f_i
         self.set_coupling_weights(parameters)  # w_ij
         self.set_phase_bias(parameters)  # phi_ij
@@ -71,8 +75,18 @@ class RobotParameters(dict): # inherits from dict class
         gps = np.array(
             salamandra_data.sensors.links.urdf_positions()[iteration, :9],
         )
-        # print("GPGS: {}".format(gps[4, 0]))
+        self.avg_x = np.mean(gps[:, 0])
+        self.update(self.parameters) 
+        # print("GPGS: {}".format(self.gps[:, 0]))
         # print("drive: {}".format(self.sim_parameters.drive))
+
+
+    def set_drive(self, parameters):
+        if not self.avg_x is None and self.avg_x > 0:
+            self.drive = 4
+        else:
+            self.drive = 2
+
 
     def set_phase_bias(self, parameters):
         """Set coupling weights"""
@@ -152,28 +166,28 @@ class RobotParameters(dict): # inherits from dict class
     def set_frequencies(self, parameters):
         """Set frequencies"""
         # Body oscillator
-        if parameters.drive >= 1.0 and parameters.drive <= 5.0:
-            self.freqs[:self.n_oscillators_body] = 0.2*parameters.drive + 0.3
+        if self.drive >= 1.0 and self.drive <= 5.0:
+            self.freqs[:self.n_oscillators_body] = 0.2*self.drive + 0.3
         else: # saturation
             self.freqs[:self.n_oscillators_body] = 0.0 
 
         # Limb oscillator
-        if parameters.drive >= 1.0 and parameters.drive <= 3.0:
-            self.freqs[self.n_oscillators_body:] = 0.2*parameters.drive + 0.0
+        if self.drive >= 1.0 and self.drive <= 3.0:
+            self.freqs[self.n_oscillators_body:] = 0.2*self.drive + 0.0
         else: # saturation
             self.freqs[self.n_oscillators_body:] = 0.0
 
     def set_nominal_amplitudes(self, parameters):
         """Set nominal amplitudes"""
         # Body oscillator
-        if parameters.drive >= 1.0 and parameters.drive <= 5.0:
-            self.nominal_amplitudes[:self.n_oscillators_body] = 0.065*parameters.drive + 0.196
+        if self.drive >= 1.0 and self.drive <= 5.0:
+            self.nominal_amplitudes[:self.n_oscillators_body] = 0.065*self.drive + 0.196
         else: # saturation
             self.nominal_amplitudes[:self.n_oscillators_body] = 0.0 
 
         # Limb oscillator
-        if parameters.drive >= 1.0 and parameters.drive <= 3.0:
-            self.nominal_amplitudes[self.n_oscillators_body:] = 0.131*parameters.drive + 0.131
+        if self.drive >= 1.0 and self.drive <= 3.0:
+            self.nominal_amplitudes[self.n_oscillators_body:] = 0.131*self.drive + 0.131
         else: # saturation
             self.nominal_amplitudes[self.n_oscillators_body:] = 0.0 
 

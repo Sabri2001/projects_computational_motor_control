@@ -89,14 +89,6 @@ def motor_output(phases, amplitudes, iteration):
     # leg motors: 8 -> Mapped from phases[16:20] and amplitudes[16:20] with cos(shoulder) & sin(wrist) for each limb
     # output -> spine output for motor (head to tail) + leg output (Front Left
     # shoulder, Front Left wrist, Front Right, Hind Left, Hind right)
-    # phases = np.append(
-    #    np.zeros_like(phases)[
-    #        :16], np.zeros_like(phases)[
-    #        16:20])
-    # amplitudes = np.append(
-    #    np.zeros_like(amplitudes)[
-    #        :16], np.zeros_like(amplitudes)[
-    #        16:20])
     return np.concatenate([q_body,q_leg])
 
 

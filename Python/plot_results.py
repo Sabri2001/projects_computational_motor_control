@@ -141,6 +141,12 @@ def sum_torques(joints_data):
     return np.sum(np.abs(joints_data[:, :]))
 
 
+def cost_of_transport(joints_torques, joints_velocities):
+    """Compute mean """
+    instant_powers = joints_torques*joints_velocities
+    
+
+
 def main(files, plot=True):
     """Main"""
 
@@ -173,7 +179,7 @@ def main(files, plot=True):
         # Metrics (scalar)
         # Note: use dir() to know metrics than can be applied to object
         # print("Total torque: ", sum_torques(joints_torques))
-        speed_vec.append(compute_speed(links_positions, links_vel)[0]) # only axial speed here
+        # speed_vec.append(compute_speed(links_positions, links_vel)[0]) # only axial speed here
 
     # Notes:
     # For the links arrays: positions[iteration, link_id, xyz]
@@ -187,11 +193,13 @@ def main(files, plot=True):
     # plt.figure('Trajectory')
     # plot_trajectory(head_positions)
 
-    # 2D plot for grid search (update drive values!!)
-    results = np.array([[i,j*0.5,0] for i in np.linspace(1,3,4) for j in range(1,4)])
-    results[:,2] = np.array(speed_vec)
-    print(results)
-    plot_2d(results,["Drive [-]","Wave number k [-]","Mean speed [m/s]"])
+    # 2D plot for grid search (NOTE: update parameter ranges+labels)
+    # param_range1 = np.linspace(3,5,4)
+    # param_range2 = [pi/8, 2*pi/8, 3*pi/8]
+    # results = np.array([[i,j,0] for i in param_range1 for j in param_range2])
+    # results[:,2] = np.array(speed_vec)
+    # print(results)
+    # plot_2d(results,["Drive [-]","Wave number k [-]","Mean speed [m/s]"]) # param1, param2, metric
 
     # Show plots
     # if plot:
@@ -201,14 +209,19 @@ def main(files, plot=True):
 
 
 def test_2D():
+    """Test 2D grid search plot"""
     results = np.array([[i,j*pi/8,0] for i in np.linspace(3,5,4) for j in range(1,4)])
     results[:,2] = results[:,0] + results[:,1]
     print(results)
     plot_2d(results,["x","y","z"])
 
 
+def test_cost_of_transport():
+    """Test 2D grid search plot"""
+    
+
 if __name__ == '__main__':
     # main(plot=save_plots()) -> that's for saving plots
-    # file_names = [f'./logs/exo2a/simulation_{i}' for i in range(12)]
+    file_names = [f'./logs/exo2a/simulation_{i}' for i in range(1)]
     # file_names = [f'./logs/exo2b/simulation_{i}' for i in range(12)]
-    # main(files=file_names, plot=True)
+    main(files=file_names, plot=False)
