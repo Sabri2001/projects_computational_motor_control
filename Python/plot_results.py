@@ -14,6 +14,66 @@ from network import motor_output
 import matplotlib.colors as colors
 from math import pi
 
+def plot_oscillator_patterns(times, outputs, drive, vlines=[0,20,40], walk_timesteps=[16, 17], swim_timesteps=[26, 27]):
+    fig, axes = plt.subplots(4, 1, figsize=(8, 8), sharex=True, height_ratios=[2, 0.5, 1, 1])
+
+    # Body oscillators
+    axes[0].set_ylabel('x Body')
+    # Spine oscillators 0 to 7 (left side, head to tail)
+    for i in range(8):
+        color = 'b' if i < 4 else 'g' # Blue for trunk, green for tail
+        # Assign single label for body and limb
+        label = None
+        if i == 0:
+            label = 'Trunk'
+        elif i == 4:
+            label = 'Tail'
+        axes[0].plot(times, outputs[:, i]-i*2, color, label=label)
+        axes[0].text(-1.5, outputs[0, i]-i*2, f'$x_{i + 1}$', fontsize='small')
+    # Remove the y-ticks
+    axes[0].yaxis.set_tick_params(labelleft=False)
+    axes[0].set_yticks([])
+    # Add trunk and tail labels
+    axes[0].legend()
+
+    # Plot the red line for walking
+    xs = [walk_timesteps[0], walk_timesteps[0], walk_timesteps[1], walk_timesteps[1]]
+    ys = [outputs[walk_timesteps[0], 0], outputs[walk_timesteps[0], 3]-3*2, outputs[walk_timesteps[1], 4]-4*2, outputs[walk_timesteps[1], 7]-7*2]
+    axes[0].plot(xs, ys, 'r')
+    # Plot the red line for swimming
+    ys = [outputs[swim_timesteps[0], 0], outputs[walk_timesteps[1], 7]-7*2]
+    axes[0].plot(swim_timesteps, ys, 'r')
+
+    # Limb oscillators
+    axes[1].set_ylabel('x Limb')
+    # Plot both oscillators
+    axes[1].plot(times, outputs[:, 16], 'b')
+    axes[1].text(-1.5, outputs[0, 16], "$x_{17}$", fontsize='small')
+    axes[1].plot(times, outputs[:, 18]-2, 'g')
+    axes[1].text(-1.5, outputs[0, 18]-2, "$x_{19}$", fontsize='small')
+    # Remove the y-ticks
+    axes[1].yaxis.set_tick_params(labelleft=False)
+    axes[1].set_yticks([])
+    # Equal axis size as previous
+    axes[1].axis('equal')
+
+    # Frequency ??
+    axes[2].set_ylabel('Freq [Hz]')
+    axes[2].text(0,0.9,'todo')
+
+    # Drive
+    axes[3].set_ylabel('drive d')
+    axes[3].plot(times, drive, 'black')
+
+    # Label time axes
+    axes[-1].set_xlabel('Time [s]')
+    # Add gray dashed lines to all plots
+    for ax in axes:
+        ymin, ymax = ax.get_ylim()
+        ax.vlines(vlines, ymin, ymax, 'gray', 'dashed', alpha=0.2)
+
+    # Correct the layout
+    plt.tight_layout()
 
 def plot_positions(times, link_data):
     """Plot positions"""

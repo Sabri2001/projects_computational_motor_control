@@ -10,6 +10,7 @@ from salamandra_simulation.save_figures import save_figures
 from simulation_parameters import SimulationParameters
 from network import SalamandraNetwork
 from math import pi
+import plot_results
 
 
 def run_network(duration, update=False, drive=0, timestep=1e-2):
@@ -147,25 +148,28 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
     # Plotting oscillator outputs
     # Note: artificially offset curves for visualising walking/swimming patterns
     # Spine oscillators 0 to 7 (left side, head to tail)
-    plt.figure()
-    plt.plot(times, outputs[:, 0],'b',label='Osc_output0')
-    plt.plot(times, outputs[:, 1]-2,'b', label='Osc_output1')
-    plt.plot(times, outputs[:, 2]-4,'b', label='Osc_output2')
-    plt.plot(times, outputs[:, 3]-6,'b', label='Osc_output3')
-    plt.plot(times, outputs[:, 4]-8,'g', label='Osc_output4')
-    plt.plot(times, outputs[:, 5]-10,'g', label='Osc_output5')
-    plt.plot(times, outputs[:, 6]-12,'g', label='Osc_output6')
-    plt.plot(times, outputs[:, 7]-14,'g', label='Osc_output7')
+    # plt.figure()
+    # plt.plot(times, outputs[:, 0],'b',label='Osc_output0')
+    # plt.plot(times, outputs[:, 1]-2,'b', label='Osc_output1')
+    # plt.plot(times, outputs[:, 2]-4,'b', label='Osc_output2')
+    # plt.plot(times, outputs[:, 3]-6,'b', label='Osc_output3')
+    # plt.plot(times, outputs[:, 4]-8,'g', label='Osc_output4')
+    # plt.plot(times, outputs[:, 5]-10,'g', label='Osc_output5')
+    # plt.plot(times, outputs[:, 6]-12,'g', label='Osc_output6')
+    # plt.plot(times, outputs[:, 7]-14,'g', label='Osc_output7')
 
-    # Front limbs (left then right)
-    plt.plot(times, outputs[:, 16]-18,'b',label='Osc_output16')
-    plt.plot(times, outputs[:, 18]-20,'g', label='Osc_output18')
+    # # Front limbs (left then right)
+    # plt.plot(times, outputs[:, 16]-18,'b',label='Osc_output16')
+    # plt.plot(times, outputs[:, 18]-20,'g', label='Osc_output18')
 
-    # TODO: Red/dashed lines for visualisation
+    # TODO: adjust red/dashed lines for visualisation
 
-    plt.xlabel('Time')
-    plt.ylabel('X')
-    plt.legend()
+    # plt.xlabel('Time')
+    # plt.ylabel('X')
+    # plt.legend()
+
+    plot_results.plot_oscillator_patterns(times, outputs, drive) # TODO plot frequencies
+
 
     return
 
