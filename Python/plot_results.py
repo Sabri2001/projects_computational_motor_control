@@ -223,18 +223,18 @@ def main(files, plot=True):
             stop=timestep*n_iterations,
             step=timestep,
         )
-        # timestep = times[1] - times[0]
+        timestep = times[1] - times[0]
         # amplitudes = parameters.amplitudes
         # phase_lag_body = parameters.phase_lag_body
-        # osc_phases = data.state.phases()
-        # osc_amplitudes = data.state.amplitudes()
+        osc_phases = np.array(data.state.phases())
+        osc_amplitudes = data.state.amplitudes()
         links_positions = np.array(data.sensors.links.urdf_positions())
         links_vel = np.array(data.sensors.links.com_lin_velocities())
-        # head_positions = links_positions[:, 0, :]
-        # tail_positions = links_positions[:, 8, :]
-        # joints_positions = data.sensors.joints.positions_all() # check oscillation or ramp (for power)!
-        # joints_velocities = data.sensors.joints.velocities_all()
-        # joints_torques = data.sensors.joints.motor_torques_all()
+        head_positions = links_positions[:, 0, :]
+        tail_positions = links_positions[:, 8, :]
+        joints_positions = data.sensors.joints.positions_all() # check oscillation or ramp (for power)!
+        joints_velocities = data.sensors.joints.velocities_all()
+        joints_torques = data.sensors.joints.motor_torques_all()
 
         # Metrics (scalar)
         # Note: use dir() to know metrics than can be applied to object
@@ -246,12 +246,19 @@ def main(files, plot=True):
     # For the positions arrays: positions[iteration, xyz]
     # For the joints arrays: positions[iteration, joint]
 
-    # Plot data
+    # Plot Traj/Positions
     # head_positions = np.asarray(head_positions)
     # plt.figure('Positions')
     # plot_positions(times, head_positions)
     # plt.figure('Trajectory')
     # plot_trajectory(head_positions)
+    # plt.show()
+
+    # Plot phase oscillator 0
+    plt.figure("Oscillators")
+    plt.plot(times,osc_phases[:,0])
+    plt.show()
+    # print("Osc phases: ", osc_phases.shape)
 
     # 2D plot for grid search (NOTE: update parameter ranges+labels)
     # param_range1 = np.linspace(3,5,4)
@@ -278,10 +285,11 @@ def test_2D():
 
 def test_cost_of_transport():
     """Test 2D grid search plot"""
+    # TODO
     
 
 if __name__ == '__main__':
     # main(plot=save_plots()) -> that's for saving plots
-    file_names = [f'./logs/exo2a/simulation_{i}' for i in range(1)]
-    # file_names = [f'./logs/exo2b/simulation_{i}' for i in range(12)]
+    # file_names = [f'./logs/exo2a/simulation_{i}' for i in range(12)]
+    file_names = [f'./logs/exo2b/simulation_{i}' for i in range(1)]
     main(files=file_names, plot=False)

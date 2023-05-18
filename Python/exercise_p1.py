@@ -52,6 +52,13 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
     ])
     phases_log[0, :] = network.state.phases(iteration=0)
 
+    # dphase
+    dphases_log = np.zeros([
+        n_iterations,
+        20 # as only recording values for one oscillator for now
+    ])
+    dphases_log[0, :] = network.get_dphase(iteration=0)
+
     amplitudes_log = np.zeros([
         n_iterations,
         len(network.state.amplitudes(iteration=0))
@@ -112,14 +119,22 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
     ))
 
     # Implement plots of network results
-    pylog.warning('DONE: Implement plots')
-    # Plotting the phases
+    # pylog.warning('DONE: Implement plots')
+    # # Plotting the phases
     # plt.figure()
     # plt.plot(times, phases_log[:, 0], label='Body phase')
     # plt.plot(times, phases_log[:, 16], label='Limb phase')
     # plt.xlabel('Time')
     # plt.ylabel('Phase')
+    # plt.title("Phases")
     # plt.legend()
+
+    # Plotting the phase derivatives (for oscillator 16)
+    plt.figure()
+    plt.plot(times, dphases_log[:, 16], label='Limb dphase')
+    plt.xlabel('Times')
+    plt.ylabel('Dphase')
+    plt.legend()
 
     # Plotting the amplitudes
     # plt.figure()
@@ -129,7 +144,7 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
     # plt.ylabel('Amplitude')
     # plt.legend()
 
-    # # Plotting the nominal amplitudes
+    # # # Plotting the nominal amplitudes
     # plt.figure()
     # plt.plot(times, amplitude_rates_log[:, 0], label='Body nominal amplitude')
     # plt.plot(times, amplitude_rates_log[:, 16], label='Limb nominal amplitude')
@@ -177,7 +192,7 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
 def exercise_1a_networks(plot, timestep=1e-2):
     """[Project 1] Exercise 1: """
 
-    run_network(duration=40, update=True)
+    run_network(duration=20, update=True)
 
     # Show plots
     if plot:
@@ -188,4 +203,4 @@ def exercise_1a_networks(plot, timestep=1e-2):
 
 
 if __name__ == '__main__':
-    exercise_1a_networks(plot=not save_plots    ())
+    exercise_1a_networks(plot=not save_plots())

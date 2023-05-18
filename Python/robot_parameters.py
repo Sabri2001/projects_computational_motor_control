@@ -49,7 +49,7 @@ class RobotParameters(dict): # inherits from dict class
 
     def update(self, parameters):
         """Update network from parameters"""
-        self.set_drive(parameters)
+        # self.set_drive(parameters) MAKE SURE ONLY DONE FOR EXO4!!!
         self.set_frequencies(parameters)  # f_i
         self.set_coupling_weights(parameters)  # w_ij
         self.set_phase_bias(parameters)  # phi_ij
