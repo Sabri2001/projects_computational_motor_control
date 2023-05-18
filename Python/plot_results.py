@@ -211,6 +211,8 @@ def main(files, plot=True):
     """Main"""
 
     speed_vec  = []
+    torque_vec = []
+
     for file_name in files:
         # Load data
         data = SalamandraData.from_file(file_name+'.h5')
@@ -239,7 +241,8 @@ def main(files, plot=True):
         # Metrics (scalar)
         # Note: use dir() to know metrics than can be applied to object
         # print("Total torque: ", sum_torques(joints_torques))
-        # speed_vec.append(compute_speed(links_positions, links_vel)[0]) # only axial speed here
+        torque_vec.append(sum_torques(joints_torques))
+        speed_vec.append(compute_speed(links_positions, links_vel)[0]) # only axial speed here
 
     # Notes:
     # For the links arrays: positions[iteration, link_id, xyz]
@@ -256,17 +259,27 @@ def main(files, plot=True):
 
     # Plot phase oscillator 0
     plt.figure("Oscillators")
-    plt.plot(times,osc_phases[:,0])
+    plt.plot(times,osc_phases[:,0]) # [:,nb of oscillator]
     plt.show()
-    # print("Osc phases: ", osc_phases.shape)
+    print("Osc phases: ", osc_phases.shape)
 
-    # 2D plot for grid search (NOTE: update parameter ranges+labels)
-    # param_range1 = np.linspace(3,5,4)
-    # param_range2 = [pi/8, 2*pi/8, 3*pi/8]
-    # results = np.array([[i,j,0] for i in param_range1 for j in param_range2])
-    # results[:,2] = np.array(speed_vec)
-    # print(results)
+    # 2D plot for grid search speed metric
+    param_range1 = np.linspace(3,5,4) # drive
+    param_range2 = [pi/8, 2*pi/8, 3*pi/8] # phase_lag_body
+    results = np.array([[i,j,0] for i in param_range1 for j in param_range2])
+    results[:,2] = np.array(speed_vec)
+    print(results)
     # plot_2d(results,["Drive [-]","Wave number k [-]","Mean speed [m/s]"]) # param1, param2, metric
+    plot_2d(results,["Drive [-]","Phase lag body [-]","Mean speed [m/s]"]) # param1, param2, metric
+    
+    # 2D plot for grid search torque metric
+    param_range1 = np.linspace(3,5,4) # drive
+    param_range2 = [pi/8, 2*pi/8, 3*pi/8] # phase_lag_body
+    results = np.array([[i,j,0] for i in param_range1 for j in param_range2])
+    results[:,2] = np.array(torque_vec)
+    print(results)
+    # plot_2d(results,["Drive [-]","Wave number k [-]","Mean speed [m/s]"]) # param1, param2, metric
+    plot_2d(results,["Drive [-]","Phase lag body [-]","Total torque [N m]"]) # param1, param2, metric
 
     # Show plots
     # if plot:
@@ -290,6 +303,6 @@ def test_cost_of_transport():
 
 if __name__ == '__main__':
     # main(plot=save_plots()) -> that's for saving plots
-    # file_names = [f'./logs/exo2a/simulation_{i}' for i in range(12)]
-    file_names = [f'./logs/exo2b/simulation_{i}' for i in range(1)]
+    file_names = [f'./logs/exo2a/simulation_{i}' for i in range(12)]
+    # file_names = [f'./logs/exo2b/simulation_{i}' for i in range(1)]
     main(files=file_names, plot=False)

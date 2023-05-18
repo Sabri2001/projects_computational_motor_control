@@ -34,8 +34,8 @@ def exercise_3a_coordination(timestep):
             # turn=0,  # Another example -> no used now
             # ...
         )
-        # for drive in np.linspace(1, 3, 4)
-        # for phase_lag_body_limb in np.linspace(-1,1,6)
+        for drive in np.linspace(1, 3, 4)
+        for phase_lag_body_limb in np.linspace(-1,1,6)
     ]
 
     # Grid search
@@ -88,7 +88,7 @@ def exercise_3b_coordination(timestep):
             # ...
         )
         # for drive in np.linspace(1, 3, 4)
-        # for amplitudes in np.linspace(...) ?? -> 0° to 30° as in paper for eg (0° as asked in instructions)?
+        # for amplitudes in np.linspace(...) # ?? -> 0° to 30° as in paper for eg (0° as asked in instructions)?
     ]
 
     # Grid search
