@@ -152,11 +152,11 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 *.pdf
-*.sdf
-*.yaml
+#*.sdf
+#*.yaml
 *.mp4
-*.stl
-*.obj
+#*.stl
+#*.obj
 *.tex
 *.cls
 *.dot
