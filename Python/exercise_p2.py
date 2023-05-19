@@ -7,6 +7,7 @@ from salamandra_simulation.simulation import simulation
 from simulation_parameters import SimulationParameters
 import farms_pylog as pylog
 from math import pi
+import argparse
 
 
 def exercise_2a_swim(timestep, gui, save = False):
@@ -116,5 +117,16 @@ def exercise_2b_walk(timestep, gui, save=False):
 
 
 if __name__ == '__main__':
-    exercise_2a_swim(timestep=1e-2, gui=False)
-    # exercise_2b_walk(timestep=1e-2, gui=False)
+    """Parse args"""
+    parser = argparse.ArgumentParser(description=(
+        'CMC lab'
+    ))
+    parser.add_argument(
+        '--save', '--save-simulations', '-s',
+        help='Save simulations data',
+        dest='save',
+        action='store_true'
+    )
+    args, _ = parser.parse_known_args()
+    exercise_2a_swim(timestep=1e-2, gui=False, save=args.save)
+    exercise_2b_walk(timestep=1e-2, gui=False, save=args.save)
