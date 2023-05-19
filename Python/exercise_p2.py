@@ -22,9 +22,10 @@ def exercise_2a_swim(timestep, gui, save = False):
 
     # PERSONAL NOTES
     # phase lag: now 2pi/8 => 8 oscillators form complete S-shape, according to salamander k: 0.5 -> 1.5
-    # drive: 3 to 5 => freq 0.9 to 1.3 and R 0.391 to 0.521 (not quite what in paper Salamandra II but fine)
-    # check speed/torque + energy they ask for quantity representing both speed/power at same time, eg ratio?
-    # -> good idea! power/speed = cost of transport
+    # drive: 3 to 5 => freq 0.9 to 1.3 and R 0.391 to 0.521
+    # check speed/torque 
+    # -> TODO: power/speed -> similar to cost of transport (energy/distance)
+
     # Parameters
     parameter_set = [
         SimulationParameters(
@@ -83,7 +84,7 @@ def exercise_2b_walk(timestep, gui, save=False):
             timestep=timestep,  # Simulation timestep in [s]
             spawn_position=[0, 0, 0.1],  # Robot position in [m]
             spawn_orientation=[0, 0, 0],  # Orientation in Euler angles [rad]
-            drive = 3,
+            drive = drive,
             phase_lag_body=phase_lag_body,  # or np.zeros(n_joints) for example
             phase_lag_body_limb = 0.0,
         )
@@ -115,5 +116,5 @@ def exercise_2b_walk(timestep, gui, save=False):
 
 
 if __name__ == '__main__':
-    # exercise_2a_swim(timestep=1e-2, gui=False)
-    exercise_2b_walk(timestep=1e-2, gui=True)
+    exercise_2a_swim(timestep=1e-2, gui=False)
+    exercise_2b_walk(timestep=1e-2, gui=False)
