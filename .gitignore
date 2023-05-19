@@ -151,3 +151,15 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+*.pdf
+*.sdf
+*.yaml
+*.mp4
+*.stl
+*.obj
+*.tex
+*.cls
+*.dot
+*.png
+*.h5
+*.pickle
