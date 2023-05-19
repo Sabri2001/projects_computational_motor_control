@@ -14,7 +14,7 @@ from network import motor_output
 import matplotlib.colors as colors
 from math import pi
 
-def plot_oscillator_patterns(times, outputs, drive, vlines=[0,20,40], walk_timesteps=[16, 17], swim_timesteps=[26, 27]):
+def plot_oscillator_patterns(times, outputs, drive, freqs, vlines=[0,20,40], walk_timesteps=[16, 17], swim_timesteps=[23, 24]):
     fig, axes = plt.subplots(4, 1, figsize=(8, 8), sharex=True, height_ratios=[2, 0.5, 1, 1])
 
     # Body oscillators
@@ -38,10 +38,10 @@ def plot_oscillator_patterns(times, outputs, drive, vlines=[0,20,40], walk_times
 
     # Plot the red line for walking
     xs = [walk_timesteps[0], walk_timesteps[0], walk_timesteps[1], walk_timesteps[1]]
-    ys = [outputs[walk_timesteps[0], 0], outputs[walk_timesteps[0], 3]-3*2, outputs[walk_timesteps[1], 4]-4*2, outputs[walk_timesteps[1], 7]-7*2]
+    ys = [0.75+outputs[walk_timesteps[0], 0], 0.75+outputs[walk_timesteps[0], 3]-3*2, 0.75+outputs[walk_timesteps[1], 4]-4*2, 0.75+outputs[walk_timesteps[1], 7]-7*2]
     axes[0].plot(xs, ys, 'r')
     # Plot the red line for swimming
-    ys = [outputs[swim_timesteps[0], 0], outputs[walk_timesteps[1], 7]-7*2]
+    ys = [0.8+outputs[swim_timesteps[0], 0], 0.8+outputs[walk_timesteps[1], 7]-7*2]
     axes[0].plot(swim_timesteps, ys, 'r')
 
     # Limb oscillators
@@ -57,20 +57,89 @@ def plot_oscillator_patterns(times, outputs, drive, vlines=[0,20,40], walk_times
     # Equal axis size as previous
     axes[1].axis('equal')
 
-    # Frequency ??
-    axes[2].set_ylabel('Freq [Hz]')
-    axes[2].text(0,0.9,'todo')
+    # Frequency
+    axes[2].set_ylabel("$\\dot{\phi}$ [rad/s]")
+    axes[2].plot(times, freqs[:, 0], color='black', label='spine')
+    axes[2].plot(times, freqs[:, 16], color='black', linestyle='dashed', label='limb')
+    axes[2].legend()
 
     # Drive
     axes[3].set_ylabel('drive d')
-    axes[3].plot(times, drive, 'black')
+    axes[3].plot(times, drive, 'black',)
+    axes[3].axhline(y=6, xmin=0, xmax=3, color="orange", linewidth=1, zorder=0)
+    axes[3].axhline(y=3, xmin=0, xmax=3, color="orange", linewidth=1, zorder=0)
+    axes[3].axhline(y=0, xmin=0, xmax=3, color="orange", linewidth=1, zorder=0)
+    axes[3].text(0.25, 1.5, 'Walking', fontsize=14)
+    axes[3].text(20.25, 4.15, 'Swimming', fontsize=14)
 
+    
     # Label time axes
     axes[-1].set_xlabel('Time [s]')
     # Add gray dashed lines to all plots
     for ax in axes:
         ymin, ymax = ax.get_ylim()
         ax.vlines(vlines, ymin, ymax, 'gray', 'dashed', alpha=0.2)
+
+    # Correct the layout
+    plt.tight_layout()
+
+def plot_oscillator_properties(times, outputs, drive, freqs_log, amplitudes_log, vlines=[0,20,40], walk_timesteps=[16, 17], swim_timesteps=[26, 27]):
+    fig, axes = plt.subplots(4, 1, figsize=(8, 8), sharex=True, height_ratios=[1, 1, 1, 1])
+
+    # Body oscillators
+    axes[0].set_ylabel('$x$')
+    # Plot spine and limb oscillations
+    axes[0].plot(times, outputs[:, 0], color='black')
+    axes[0].plot(times, outputs[:, 16]-2,color='black', linestyle='dashed')
+    # Remove the y-ticks
+    axes[0].yaxis.set_tick_params(labelleft=False)
+    axes[0].set_yticks([])
+
+    # Frequencies
+    axes[1].set_ylabel('Freq [Hz]')
+    # Plot both oscillators
+    axes[1].plot(times, freqs_log[:, 0], color='black')
+    axes[1].plot(times, freqs_log[:, 16], color='black', linestyle='dashed')
+    
+    axes[2].set_ylabel('r')
+    # Amplitudes
+    axes[2].plot(times, amplitudes_log[:, 0],  color='black')
+    axes[2].plot(times, amplitudes_log[:, 16], color='black', linestyle='dashed')
+
+    # Drive
+    axes[3].set_ylabel('drive d')
+    axes[3].plot(times, drive, 'black')
+    axes[3].axhline(y=6, xmin=0, xmax=3, color="black", linestyle='dotted', linewidth=1, zorder=0)
+    axes[3].axhline(y=3, xmin=0, xmax=3, color="black", linestyle='dotted', linewidth=1, zorder=0)
+    axes[3].axhline(y=0, xmin=0, xmax=3, color="black", linestyle='dotted', linewidth=1, zorder=0)
+    
+    # Label time axes
+    axes[-1].set_xlabel('Time [s]')
+    # Add gray dashed lines to all plots
+    for ax in axes:
+        ymin, ymax = ax.get_ylim()
+        ax.vlines(vlines, ymin, ymax, 'gray', 'dashed', alpha=0.2)
+
+    # Correct the layout
+    plt.tight_layout()
+
+def plot_drive_effects(drive, freqs, amplitudes):
+    fig, axes = plt.subplots(2, 1, figsize=(8, 8), sharex=True)
+    
+    # Frequencies
+    axes[0].set_ylabel('Freq [Hz]')
+    axes[0].plot(drive, freqs[:, 0], color='black', label='spine')
+    axes[0].plot(drive, freqs[:, 16], color='black', linestyle='dashed', label='limb')
+    # Add spine and limb labels
+    axes[0].legend()
+    
+    axes[1].set_ylabel('r')
+    # Amplitudes
+    axes[1].plot(drive, amplitudes[:, 0],  color='black')
+    axes[1].plot(drive, amplitudes[:, 16], color='black', linestyle='dashed')
+    
+    # Label drive axes
+    axes[-1].set_xlabel('drive')
 
     # Correct the layout
     plt.tight_layout()

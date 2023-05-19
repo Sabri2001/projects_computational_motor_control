@@ -34,7 +34,7 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
         phase_lag_body_limb = 0.0,
         turn=None,
     )
-    pylog.warning(
+    pylog.info(
         'DONE: Modify the scalar drive to be a vector of length n_iterations. By doing so the drive will be modified to be drive[i] at each time step i.')
     drive = [6*i/(n_iterations-1) for i in range(n_iterations)]
     state = SalamandraState.salamandra_robot(n_iterations) 
@@ -89,7 +89,7 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
     outputs[0, :] = network.outputs(iteration=0)
 
 
-    pylog.warning(
+    pylog.info(
         'DONE: Implement plots here, try to plot the various logged data to check the implementation')
     # Run network ODE and log data
     tic = time.time()
@@ -117,68 +117,17 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
     ))
 
     # Implement plots of network results
-    # pylog.warning('DONE: Implement plots')
+    pylog.info('DONE: Implement plots')
 
-    # Plotting the phases
-    # plt.figure()
-    # plt.plot(times, phases_log[:, 0], label='Body phase')
-    # plt.plot(times, phases_log[:, 16], label='Limb phase')
-    # plt.xlabel('Time')
-    # plt.ylabel('Phase')
-    # plt.title("Phases")
-    # plt.legend()
+    # Plotting oscillator patterns
+    # Note: artificially offset curves for visualising walking/swimming patterns
+    plot_results.plot_oscillator_patterns(times, outputs, drive, dphases_log)
 
-    # # Plotting the phase derivatives (for oscillator 0 -> spine oscillator)
-    plt.figure()
-    plt.plot(times, dphases_log[:, 0], label='Limb dphase')
-    plt.xlabel('Times')
-    plt.ylabel('Dphase')
-    plt.legend()
+    # Plotting oscillator properties
+    plot_results.plot_oscillator_properties(times, outputs, drive, freqs_log, amplitudes_log)
 
-    # # Plotting the amplitudes
-    # plt.figure()
-    # plt.plot(times, amplitudes_log[:, 0], label='Body amplitude')
-    # plt.plot(times, amplitudes_log[:, 16], label='Limb amplitude')
-    # plt.xlabel('Times')
-    # plt.ylabel('Amplitude')
-    # plt.legend()
-
-    # # # # Plotting the nominal amplitudes
-    # plt.figure()
-    # plt.plot(times, amplitude_rates_log[:, 0], label='Body nominal amplitude')
-    # plt.plot(times, amplitude_rates_log[:, 16], label='Limb nominal amplitude')
-    # plt.xlabel('Times')
-    # plt.ylabel('Nominal amplitude')
-    # plt.legend()
-
-    # # # Plotting the frequencies
-    plt.figure()
-    plt.plot(times, freqs_log[:, 0], label='Body frequency')
-    plt.plot(times, freqs_log[:, 16], label='Limb frequency')
-    plt.xlabel('Time')
-    plt.ylabel('Frequency')
-    plt.legend()
-
-    # # Plotting oscillator outputs
-    # # Note: artificially offset curves for visualising walking/swimming patterns
-    # plt.figure()
-    # plt.plot(times, outputs[:, 0],'b',label='Osc_output0') # Spine oscillators 0 to 7 (left side, head to tail)
-    # plt.plot(times, outputs[:, 1]-2,'b', label='Osc_output1')
-    # plt.plot(times, outputs[:, 2]-4,'b', label='Osc_output2')
-    # plt.plot(times, outputs[:, 3]-6,'b', label='Osc_output3')
-    # plt.plot(times, outputs[:, 4]-8,'g', label='Osc_output4')
-    # plt.plot(times, outputs[:, 5]-10,'g', label='Osc_output5')
-    # plt.plot(times, outputs[:, 6]-12,'g', label='Osc_output6')
-    # plt.plot(times, outputs[:, 7]-14,'g', label='Osc_output7')
-    # plt.plot(times, outputs[:, 16]-18,'b',label='Osc_output16') # Front limbs (left then right)
-    # plt.plot(times, outputs[:, 18]-20,'g', label='Osc_output18')
-    # plt.xlabel('Time')
-    # plt.ylabel('X')
-    # plt.legend()
-    # TODO: Red/dashed lines for visualisation
-
-    plot_results.plot_oscillator_patterns(times, outputs, drive) # TODO plot frequencies
-
+    # Plot radius and frequency against drive
+    plot_results.plot_drive_effects(drive, freqs_log, amplitudes_log)
 
     return
 
@@ -186,7 +135,7 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
 def exercise_1a_networks(plot, timestep=1e-2):
     """[Project 1] Exercise 1: """
 
-    run_network(duration=20, update=True)
+    run_network(duration=40, update=True)
 
     # Show plots
     if plot:
