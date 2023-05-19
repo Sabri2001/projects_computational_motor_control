@@ -324,19 +324,20 @@ def main(files, plot=True):
     # plot_trajectory(head_positions)
     # plt.show()
 
-    # Plot phase oscillator 0
-    # plt.figure("Oscillators")
-    # plt.plot(times,osc_phases[:,0]) # [:,nb of oscillator]
-    # plt.show()
-    # print("Osc phases: ", osc_phases.shape)
+    # Body phase lags 
+    plt.figure("Oscillators")
+    plt.plot(times,osc_phases[:,0]-osc_phases[:,1]) # phase lag within first half of spine
+    plt.plot(times,osc_phases[:,3]-osc_phases[:,4]) # phase lag between first and second half of spine 
+    plt.plot(times,osc_phases[:,4]-osc_phases[:,5]) # phase lag within second half of spine 
+    plt.show()
 
     # 2D plot for grid search speed metric (NOTE: should update x/y labels + ranges)
-    param_range1 = np.linspace(1,3,4) # drive
-    param_range2 = np.linspace(0, pi/6, )*180/pi # nominal ampli (in °)
-    results = np.array([[i,j,0] for i in param_range1 for j in param_range2])
-    results[:,2] = np.array(speed_vec)
-    print(results)
-    plot_2d(results,["Drive [-]","Nominal amplitude [°]","Mean speed [m/s]"]) # param1, param2, metric
+    # param_range1 = np.linspace(1,3,4) # drive
+    # param_range2 = np.linspace(0, pi/6, )*180/pi # nominal ampli (in °)
+    # results = np.array([[i,j,0] for i in param_range1 for j in param_range2])
+    # results[:,2] = np.array(speed_vec)
+    # print(results)
+    # plot_2d(results,["Drive [-]","Nominal amplitude [°]","Mean speed [m/s]"]) # param1, param2, metric
     
     # 2D plot for grid search torque metric (NOTE: should update x/y labels + ranges)
     # param_range1 = np.linspace(3,5,4) # drive

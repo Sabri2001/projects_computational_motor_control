@@ -117,4 +117,4 @@ def exercise_2b_walk(timestep, gui, save=False):
 
 if __name__ == '__main__':
     exercise_2a_swim(timestep=1e-2, gui=False)
-    exercise_2b_walk(timestep=1e-2, gui=False)
+    # exercise_2b_walk(timestep=1e-2, gui=False)
