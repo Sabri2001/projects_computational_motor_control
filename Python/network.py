@@ -72,7 +72,7 @@ def motor_output(phases, amplitudes, iteration):
     # Implement equation here
     q_body = np.zeros(8)
     for i in range(8):
-        q_body[i] = 1.5*amplitudes[i]*(1+np.cos(phases[i])) - amplitudes[i+8]*(1+np.cos(phases[i+8]))
+        q_body[i] = amplitudes[i]*(1+np.cos(phases[i])) - amplitudes[i+8]*(1+np.cos(phases[i+8]))
 
     q_leg = np.array([])
     # for i in [16,18,17,19]: # so that commands respect required order, see a few lines lower
@@ -81,11 +81,6 @@ def motor_output(phases, amplitudes, iteration):
     for i in [17,19,16,18]: # works, but doesn't respect order stated below... CHECK!!!
         q_leg = np.append(q_leg,amplitudes[i]*np.cos(phases[i])) # shoulder
         q_leg = np.append(q_leg,amplitudes[i]*np.sin(phases[i])) # wrist
-
-    # q_leg[0] = q_leg[0]*2 For turning
-    # q_leg[1] = q_leg[1]*2
-    # q_leg[4] = q_leg[4]*2
-    # q_leg[5] = q_leg[5]*2
 
     # 16 + 4 oscillators
     # spine motors: 8 -> Mapped from phases[:8] & phases[8:16] and amplitudes[:8] & amplitudes[8:16]

@@ -52,6 +52,7 @@ def exercise_4a_transition(timestep):
             drive = 2,
             phase_lag_body=2*pi/8,  # or np.zeros(n_joints) for example
             phase_lag_body_limb = 0.0,
+            transition = True,
         )
     ]
 
@@ -71,6 +72,7 @@ def exercise_4a_transition(timestep):
         )
         # No need for logging
     return
+
 
 
 if __name__ == '__main__':

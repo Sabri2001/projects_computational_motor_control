@@ -47,8 +47,11 @@ class RobotParameters(dict): # inherits from dict class
         self.spine_nominal_amplitude = parameters.spine_nominal_amplitude
         # exo4:
         self.drive = parameters.drive
-        self.avg_x = None
+        self.avg_x = None # approx position robot's center of mass
         self.parameters = parameters
+        self.transition = parameters.transition
+        # exo5
+        self.turn = parameters.turn
 
         self.update(parameters)
 
@@ -60,6 +63,7 @@ class RobotParameters(dict): # inherits from dict class
         self.set_phase_bias(parameters)  # phi_ij
         self.set_nominal_amplitudes(parameters)  # R_i
         self.set_amplitudes_rate(parameters)  # a_i
+
 
     def step(self, iteration, salamandra_data):
         """Step function called at each iteration
@@ -80,19 +84,20 @@ class RobotParameters(dict): # inherits from dict class
         gps = np.array(
             salamandra_data.sensors.links.urdf_positions()[iteration, :9],
         )
-        # self.avg_x = np.mean(gps[:, 0])
-        # self.update(self.parameters) 
+        self.avg_x = np.mean(gps[:, 0])
+        self.update(self.parameters) 
         # print("GPGS: {}".format(self.gps[:, 0]))
         # print("drive: {}".format(self.sim_parameters.drive))
 
 
     def set_drive(self, parameters):
-        # if not self.avg_x is None and self.avg_x > 0:
-        #     self.drive = 4
-        # else:
-        #     self.drive = 2
-
-        self.drive = parameters.drive
+        if self.transition:
+            if not self.avg_x is None and self.avg_x > 0:
+                self.drive = 4
+            else:
+                self.drive = 2
+        else:
+            self.drive = parameters.drive
 
 
     def set_phase_bias(self, parameters):
@@ -132,6 +137,7 @@ class RobotParameters(dict): # inherits from dict class
         self.phase_bias[8:12,18] = self.phase_lag_body_limb
         self.phase_bias[12:16,19] = self.phase_lag_body_limb
 
+
     def set_coupling_weights(self, parameters):
         """Set phase bias"""
         # Body oscillators, left side
@@ -169,26 +175,31 @@ class RobotParameters(dict): # inherits from dict class
         self.coupling_weights[8:12,18] = 30.0
         self.coupling_weights[12:16,19] = 30.0
 
+
     def set_frequencies(self, parameters):
         """Set frequencies"""
         # Body oscillator
         if self.drive >= 1.0 and self.drive <= 5.0:
-            self.freqs[:self.n_oscillators_body] = 0.2*self.drive + 0.3
+            self.freqs[:self.n_oscillators_body//2] = (0.2*self.drive + 0.3)*self.turn
+            self.freqs[self.n_oscillators_body//2:self.n_oscillators_body] = 0.2*self.drive + 0.3
         else: # saturation
             self.freqs[:self.n_oscillators_body] = 0.0 
 
         # Limb oscillator
         if self.drive >= 1.0 and self.drive <= 3.0:
-            self.freqs[self.n_oscillators_body:] = 0.2*self.drive + 0.0
+            self.freqs[self.n_oscillators_body:self.n_oscillators_body+2] = (0.2*self.drive + 0.0)*self.turn
+            self.freqs[self.n_oscillators_body+2:] = 0.2*self.drive + 0.0
         else: # saturation
             self.freqs[self.n_oscillators_body:] = 0.0
+
 
     def set_nominal_amplitudes(self, parameters):
         """Set nominal amplitudes"""
         # Body oscillators
         if self.ampli_depends_on_drive:
             if self.drive >= 1.0 and self.drive <= 5.0:
-                self.nominal_amplitudes[:self.n_oscillators_body] = 0.065*self.drive + 0.196
+                self.nominal_amplitudes[:self.n_oscillators_body//2] = (0.065*self.drive + 0.196)*self.turn
+                self.nominal_amplitudes[self.n_oscillators_body//2:self.n_oscillators_body] = 0.065*self.drive + 0.196
             else: # saturation
                 self.nominal_amplitudes[:self.n_oscillators_body] = 0.0 
         else:
@@ -196,9 +207,11 @@ class RobotParameters(dict): # inherits from dict class
 
         # Limb oscillators -> always depend on drive
         if self.drive >= 1.0 and self.drive <= 3.0:
-            self.nominal_amplitudes[self.n_oscillators_body:] = 0.131*self.drive + 0.131
+            self.nominal_amplitudes[self.n_oscillators_body:self.n_oscillators_body+2] = (0.131*self.drive + 0.131)*self.turn
+            self.nominal_amplitudes[self.n_oscillators_body+2:] = (0.131*self.drive + 0.131)
         else: # saturation
             self.nominal_amplitudes[self.n_oscillators_body:] = 0.0 
+
 
     def set_amplitudes_rate(self, parameters):
         """Set amplitude rates"""

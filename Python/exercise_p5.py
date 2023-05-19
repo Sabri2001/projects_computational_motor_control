@@ -24,7 +24,7 @@ def exercise_5a_swim_turn(timestep):
             # amplitudes=[1, 2, 3],  # Just an example -> don't know what stands for, not used now
             phase_lag_body=2*pi/8,  # or np.zeros(n_joints) for example
             phase_lag_body_limb = 0.0,
-            turn=2,  # Another example
+            turn=1.5,  # Another example
         )
     ]
 
@@ -43,10 +43,10 @@ def exercise_5a_swim_turn(timestep):
             camera_id=2  # camera type: 0=top view, 1=front view, 2=side view,
         )
         # Log robot data
-        # data.to_file(filename.format(simulation_i, 'h5'), sim.iteration)
-        # # Log simulation parameters
-        # with open(filename.format(simulation_i, 'pickle'), 'wb') as param_file:
-        #     pickle.dump(sim_parameters, param_file)
+        data.to_file(filename.format(simulation_i, 'h5'), sim.iteration)
+        # Log simulation parameters
+        with open(filename.format(simulation_i, 'pickle'), 'wb') as param_file:
+            pickle.dump(sim_parameters, param_file)
     return
 
 
@@ -60,12 +60,9 @@ def exercise_5b_swim_back(timestep):
             timestep=timestep,  # Simulation timestep in [s]
             spawn_position=[0, 0, 0.1],  # Robot position in [m]
             spawn_orientation=[0, 0, 0],  # Orientation in Euler angles [rad]
-            # drive=drive,  # An example of parameter part of the grid search
             drive = 4,
-            # amplitudes=[1, 2, 3],  # Just an example -> don't know what stands for, not used now
             phase_lag_body=-2*pi/8,  # or np.zeros(n_joints) for example
             phase_lag_body_limb = 0.0,
-            turn=0,  # Another example
         )
     ]
 
@@ -84,10 +81,10 @@ def exercise_5b_swim_back(timestep):
             camera_id=2  # camera type: 0=top view, 1=front view, 2=side view,
         )
         # Log robot data
-    #     data.to_file(filename.format(simulation_i, 'h5'), sim.iteration)
-    #     # Log simulation parameters
-    #     with open(filename.format(simulation_i, 'pickle'), 'wb') as param_file:
-    #         pickle.dump(sim_parameters, param_file)
+        data.to_file(filename.format(simulation_i, 'h5'), sim.iteration)
+        # Log simulation parameters
+        with open(filename.format(simulation_i, 'pickle'), 'wb') as param_file:
+            pickle.dump(sim_parameters, param_file)
     return
 
 
@@ -102,12 +99,10 @@ def exercise_5c_walk_turn(timestep):
             timestep=timestep,  # Simulation timestep in [s]
             spawn_position=[0, 0, 0.1],  # Robot position in [m]
             spawn_orientation=[0, 0, 0],  # Orientation in Euler angles [rad]
-            # drive=drive,  # An example of parameter part of the grid search
             drive = 2,
-            # amplitudes=[1, 2, 3],  # Just an example -> don't know what stands for, not used now
             phase_lag_body=2*pi/8,  # or np.zeros(n_joints) for example
             phase_lag_body_limb = 0.0,
-            turn=0,  # Another example
+            turn=2,  # Another example
         )
     ]
 
@@ -127,9 +122,9 @@ def exercise_5c_walk_turn(timestep):
         )
         # Log robot data
         # data.to_file(filename.format(simulation_i, 'h5'), sim.iteration)
-        # # Log simulation parameters
-        # with open(filename.format(simulation_i, 'pickle'), 'wb') as param_file:
-        #     pickle.dump(sim_parameters, param_file)
+        # Log simulation parameters
+        with open(filename.format(simulation_i, 'pickle'), 'wb') as param_file:
+            pickle.dump(sim_parameters, param_file)
     return
 
 
@@ -143,12 +138,9 @@ def exercise_5d_walk_back(timestep):
             timestep=timestep,  # Simulation timestep in [s]
             spawn_position=[0, 0, 0.1],  # Robot position in [m]
             spawn_orientation=[0, 0, 0],  # Orientation in Euler angles [rad]
-            # drive=drive,  # An example of parameter part of the grid search
             drive = 2,
-            # amplitudes=[1, 2, 3],  # Just an example -> don't know what stands for, not used now
-            phase_lag_body=2*pi/8,  # or np.zeros(n_joints) for example
-            phase_lag_body_limb = 0.0,
-            turn=0,  # Another example
+            phase_lag_body=-2*pi/8,  # or np.zeros(n_joints) for example
+            phase_lag_body_limb = pi,
         )
     ]
 
@@ -167,15 +159,15 @@ def exercise_5d_walk_back(timestep):
             camera_id=2  # camera type: 0=top view, 1=front view, 2=side view,
         )
         # Log robot data
-        # data.to_file(filename.format(simulation_i, 'h5'), sim.iteration)
-        # # Log simulation parameters
-        # with open(filename.format(simulation_i, 'pickle'), 'wb') as param_file:
-        #     pickle.dump(sim_parameters, param_file)
+        data.to_file(filename.format(simulation_i, 'h5'), sim.iteration)
+        # Log simulation parameters
+        with open(filename.format(simulation_i, 'pickle'), 'wb') as param_file:
+            pickle.dump(sim_parameters, param_file)
     return
 
 
 if __name__ == '__main__':
-    # exercise_5a_swim_turn(timestep=1e-2)
-    # exercise_5b_swim_back(timestep=1e-2)
+    exercise_5a_swim_turn(timestep=1e-2)
+    exercise_5b_swim_back(timestep=1e-2)
     exercise_5c_walk_turn(timestep=1e-2)
-    # exercise_5d_walk_back(timestep=1e-2)
+    exercise_5d_walk_back(timestep=1e-2)

@@ -31,9 +31,14 @@ class SimulationParameters:
         self.weights_contact_limb_c = 0.0
 
         # Our additions
+        # exo3
         self.ampli_depends_on_drive = True
         self.phase_lag_body_limb = 0.0
         self.spine_nominal_amplitude = None
+        # exo4
+        self.transition = False
+        # exo5
+        self.turn = 1
 
         # Update object with provided keyword arguments
         # NOTE: This overrides the previous declarations
