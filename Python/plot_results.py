@@ -206,7 +206,6 @@ def cost_of_transport(joints_torques, joints_velocities):
     instant_powers = joints_torques*joints_velocities
     
 
-
 def main(files, plot=True):
     """Main"""
 
@@ -264,7 +263,7 @@ def main(files, plot=True):
 
     # 2D plot for grid search speed metric (NOTE: should update x/y labels + ranges)
     param_range1 = np.linspace(1,3,4) # drive
-    param_range2 = np.linspace(0, pi/6, 3)*180/pi # nominal ampli (in °)
+    param_range2 = np.linspace(0, pi/6, )*180/pi # nominal ampli (in °)
     results = np.array([[i,j,0] for i in param_range1 for j in param_range2])
     results[:,2] = np.array(speed_vec)
     print(results)
