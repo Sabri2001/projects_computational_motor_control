@@ -39,8 +39,13 @@ class RobotParameters(dict): # inherits from dict class
         self.position_limb_gain = parameters.position_limb_gain
 
         # our additions
+        # exo2:
         self.phase_lag_body = parameters.phase_lag_body
+        # exo3:
         self.phase_lag_body_limb = parameters.phase_lag_body_limb
+        self.ampli_depends_on_drive = parameters.ampli_depends_on_drive
+        self.spine_nominal_amplitude = parameters.spine_nominal_amplitude
+        # exo4:
         self.drive = parameters.drive
         self.avg_x = None
         self.parameters = parameters
@@ -180,13 +185,16 @@ class RobotParameters(dict): # inherits from dict class
 
     def set_nominal_amplitudes(self, parameters):
         """Set nominal amplitudes"""
-        # Body oscillator
-        if self.drive >= 1.0 and self.drive <= 5.0:
-            self.nominal_amplitudes[:self.n_oscillators_body] = 0.065*self.drive + 0.196
-        else: # saturation
-            self.nominal_amplitudes[:self.n_oscillators_body] = 0.0 
+        # Body oscillators
+        if self.ampli_depends_on_drive:
+            if self.drive >= 1.0 and self.drive <= 5.0:
+                self.nominal_amplitudes[:self.n_oscillators_body] = 0.065*self.drive + 0.196
+            else: # saturation
+                self.nominal_amplitudes[:self.n_oscillators_body] = 0.0 
+        else:
+            self.nominal_amplitudes[:self.n_oscillators_body] = self.spine_nominal_amplitude
 
-        # Limb oscillator
+        # Limb oscillators -> always depend on drive
         if self.drive >= 1.0 and self.drive <= 3.0:
             self.nominal_amplitudes[self.n_oscillators_body:] = 0.131*self.drive + 0.131
         else: # saturation

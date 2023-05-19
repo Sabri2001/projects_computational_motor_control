@@ -17,7 +17,6 @@ class SimulationParameters:
         self.amplitude_gradient = None
         # Feel free to add more parameters (ex: MLR drive)
         # self.drive_mlr = ...
-        # ...
 
         # Disruptions
         self.set_seed = False
@@ -30,6 +29,11 @@ class SimulationParameters:
         self.weights_contact_body = 0.0
         self.weights_contact_limb_i = 0.0
         self.weights_contact_limb_c = 0.0
+
+        # Our additions
+        self.ampli_depends_on_drive = True
+        self.phase_lag_body_limb = 0.0
+        self.spine_nominal_amplitude = None
 
         # Update object with provided keyword arguments
         # NOTE: This overrides the previous declarations
