@@ -144,6 +144,44 @@ def plot_drive_effects(drive, freqs, amplitudes):
     # Correct the layout
     plt.tight_layout()
 
+def plot_exercise2(files, plot=True):
+    speed_vec  = []
+    torque_vec = []
+    cot_vec = [] # TODO cost of transport
+
+    parameters = []
+
+    for file_name in files:
+        # Load data
+        data = SalamandraData.from_file(file_name+'.h5')
+        with open(file_name+'.pickle', 'rb') as param_file:
+            parameters.append(pickle.load(param_file))
+
+        links_positions = np.array(data.sensors.links.urdf_positions())
+        links_vel = np.array(data.sensors.links.com_lin_velocities())
+        joints_torques = data.sensors.joints.motor_torques_all()
+
+        # Metrics (scalar)
+        torque_vec.append(sum_torques(joints_torques))
+        speed_vec.append(compute_speed(links_positions, links_vel)[0]) # only axial speed here
+        # TODO cost of transport
+
+    # 2D plot for grid search speed metric
+    param_range1 = list(set([parameter.drive for parameter in parameters])) # drive
+    param_range2 = list(set([parameter.phase_lag_body for parameter in parameters])) # body phase lag
+    results = np.array([[i,j,0] for i in param_range1 for j in param_range2])
+
+    # Speed
+    results[:,2] = np.array(speed_vec)
+    plot_2d(results,["Drive [-]","Phase lag body [-]","Mean speed [m/s]"], cmap='viridis')
+
+    # Torques
+    results[:,2] = np.array(torque_vec)
+    plot_2d(results,["Drive [-]","Phase lag body [-]","Total torque [N m]"], cmap='magma')
+
+    # TODO cost of transport
+
+
 def plot_positions(times, link_data):
     """Plot positions"""
     for i, data in enumerate(link_data.T):
@@ -423,8 +461,9 @@ def test_2D():
 
 if __name__ == '__main__':
     # main(plot=save_plots()) -> that's for saving plots
-    # file_names = [f'./logs/exo2a/simulation_{i}' for i in range(12)]
+    file_names = [f'./logs/exo2b/simulation_{i}' for i in range(64)]
     # file_names = [f'./logs/exo2b/simulation_{i}' for i in range(12)]
     # file_names = [f'./logs/exo3a/simulation_{i}' for i in range(24)]
-    file_names = [f'./logs/exo3b/simulation_{i}' for i in range(12)]
-    main(files=file_names, plot=True)
+    # file_names = [f'./logs/exo3b/simulation_{i}' for i in range(12)]
+    # main(files=file_names, plot=True)
+    plot_exercise2(files=file_names)

@@ -38,8 +38,8 @@ def exercise_2a_swim(timestep, gui, save = False):
             phase_lag_body=phase_lag_body,  # or np.zeros(n_joints) for example
             phase_lag_body_limb = 0.0,
         )
-        for drive in np.linspace(3, 5, 4)
-        for phase_lag_body in [pi/8,2*pi/8,3*pi/8]
+        for drive in np.linspace(3, 5, 8)
+        for phase_lag_body in np.linspace(pi/8, 3*pi/8, 8) #[pi/8,2*pi/8,3*pi/8]
     ]
 
     # Grid search
@@ -89,8 +89,8 @@ def exercise_2b_walk(timestep, gui, save=False):
             phase_lag_body=phase_lag_body,  # or np.zeros(n_joints) for example
             phase_lag_body_limb = 0.0,
         )
-        for drive in np.linspace(1, 3, 4)
-        for phase_lag_body in [pi/8,2*pi/8,3*pi/8]
+        for drive in np.linspace(1, 3, 8)
+        for phase_lag_body in np.linspace(pi/8, 3*pi/8, 8) #[pi/8,2*pi/8,3*pi/8]
     ]
 
     # Grid search
