@@ -1,5 +1,8 @@
 import numpy as np
 
-a = np.array([1, 2, 3])
-a[:] = 4
-print("a: ",a)
+def fun():
+	return 3,4
+
+
+a = np.linalg.norm(np.array(fun()))
+print('a: ', a)

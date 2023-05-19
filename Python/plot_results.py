@@ -270,9 +270,16 @@ def sum_torques(joints_data):
     return np.sum(np.abs(joints_data[:, :]))
 
 
-def cost_of_transport(joints_torques, joints_velocities):
-    """Compute mean """
-    instant_powers = joints_torques*joints_velocities
+def mean_power(joints_torques, joints_velocities):
+    """Mean instantaneous power"""
+    return np.mean(joints_torques*joints_velocities)
+
+
+def power_speed_ratio(joints_torques, joints_velocities, links_positions, links_vel):
+    """Compute mean power/mean speed"""
+    power = mean_power(joints_torques, joints_velocities)
+    speed = np.linalg.norm(np.array(compute_speed(links_positions, links_vel))) # speed norm
+    return power/speed
     
 
 def main(files, plot=True):
@@ -280,6 +287,7 @@ def main(files, plot=True):
 
     speed_vec  = []
     torque_vec = []
+    power_speed_vec = []
 
     for file_name in files:
         # Load data
@@ -298,18 +306,22 @@ def main(files, plot=True):
         # phase_lag_body = parameters.phase_lag_body
         osc_phases = np.array(data.state.phases())
         osc_amplitudes = data.state.amplitudes()
-        links_positions = np.array(data.sensors.links.urdf_positions())
-        links_vel = np.array(data.sensors.links.com_lin_velocities())
+        links_positions = np.array(data.sensors.links.urdf_positions()) # shape(1000,17,3) -> 3 for xyz
+        links_vel = np.array(data.sensors.links.com_lin_velocities()) # shape(1000,17,3) -> 3 for xyz  
+            # 0 -> 8: spine joints (from head to tail), 9 -> 17: leg joints
         head_positions = links_positions[:, 0, :]
         tail_positions = links_positions[:, 8, :]
-        joints_positions = data.sensors.joints.positions_all() # check oscillation or ramp (for power)!
-        joints_velocities = data.sensors.joints.velocities_all()
-        joints_torques = data.sensors.joints.motor_torques_all()
+        joints_positions = np.array(data.sensors.joints.positions_all()) # shape (1000,16)
+        joints_velocities = np.array(data.sensors.joints.velocities_all()) # shape (1000,16)
+            # Note: checked that this is relative velocity
+        joints_torques = np.array(data.sensors.joints.motor_torques_all()) # shape (1000,16)
 
         # Metrics (scalar)
         # Note: use dir() to know metrics than can be applied to object
         torque_vec.append(sum_torques(joints_torques))
         speed_vec.append(compute_speed(links_positions, links_vel)[0]) # only axial speed here
+        power_speed_vec.append(power_speed_ratio(joints_torques, joints_velocities, links_positions, links_vel))
+
 
     # Notes:
     # For the links arrays: positions[iteration, link_id, xyz]
@@ -325,11 +337,11 @@ def main(files, plot=True):
     # plt.show()
 
     # Body phase lags 
-    plt.figure("Oscillators")
-    plt.plot(times,osc_phases[:,0]-osc_phases[:,1]) # phase lag within first half of spine
-    plt.plot(times,osc_phases[:,3]-osc_phases[:,4]) # phase lag between first and second half of spine 
-    plt.plot(times,osc_phases[:,4]-osc_phases[:,5]) # phase lag within second half of spine 
-    plt.show()
+    # plt.figure("Oscillators")
+    # plt.plot(times,osc_phases[:,0]-osc_phases[:,1]) # phase lag within first half of spine
+    # plt.plot(times,osc_phases[:,3]-osc_phases[:,4]) # phase lag between first and second half of spine 
+    # plt.plot(times,osc_phases[:,4]-osc_phases[:,5]) # phase lag within second half of spine 
+    # plt.show()
 
     # 2D plot for grid search speed metric (NOTE: should update x/y labels + ranges)
     # param_range1 = np.linspace(1,3,4) # drive
@@ -347,6 +359,14 @@ def main(files, plot=True):
     # print(results)
     # plot_2d(results,["Drive [-]","Phase lag body [-]","Total torque [N m]"]) # param1, param2, metric
 
+    # 2D plot for grid search CoT metric (NOTE: should update x/y labels + ranges)
+    param_range1 = np.linspace(3,5,4) # drive
+    param_range2 = [pi/8, 2*pi/8, 3*pi/8] # phase_lag_body
+    results = np.array([[i,j,0] for i in param_range1 for j in param_range2])
+    results[:,2] = np.array(power_speed_vec)
+    print(results)
+    plot_2d(results,["Drive [-]","Phase lag body [-]", "Power Speed Ratio [J/m]"]) # param1, param2, metric
+
     # Show plots
     if plot:
         plt.show()
@@ -360,11 +380,6 @@ def test_2D():
     results[:,2] = results[:,0] + results[:,1]
     print(results)
     plot_2d(results,["x","y","z"])
-
-
-def test_cost_of_transport():
-    """Test 2D grid search plot"""
-    # TODO
     
 
 if __name__ == '__main__':
