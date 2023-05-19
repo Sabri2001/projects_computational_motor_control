@@ -49,7 +49,7 @@ class RobotParameters(dict): # inherits from dict class
 
     def update(self, parameters):
         """Update network from parameters"""
-        # self.set_drive(parameters) MAKE SURE ONLY DONE FOR EXO4!!!
+        self.set_drive(parameters)
         self.set_frequencies(parameters)  # f_i
         self.set_coupling_weights(parameters)  # w_ij
         self.set_phase_bias(parameters)  # phi_ij
@@ -75,17 +75,19 @@ class RobotParameters(dict): # inherits from dict class
         gps = np.array(
             salamandra_data.sensors.links.urdf_positions()[iteration, :9],
         )
-        self.avg_x = np.mean(gps[:, 0])
-        self.update(self.parameters) 
+        # self.avg_x = np.mean(gps[:, 0])
+        # self.update(self.parameters) 
         # print("GPGS: {}".format(self.gps[:, 0]))
         # print("drive: {}".format(self.sim_parameters.drive))
 
 
     def set_drive(self, parameters):
-        if not self.avg_x is None and self.avg_x > 0:
-            self.drive = 4
-        else:
-            self.drive = 2
+        # if not self.avg_x is None and self.avg_x > 0:
+        #     self.drive = 4
+        # else:
+        #     self.drive = 2
+
+        self.drive = parameters.drive
 
 
     def set_phase_bias(self, parameters):
@@ -93,7 +95,6 @@ class RobotParameters(dict): # inherits from dict class
         # Body oscillators, left side
         for i in range(int(self.n_oscillators_body/2)):
             if i != self.n_oscillators_body/2-1: # not at the end of the spinal cord
-                # CLARIFY CONVENTION??
                 self.phase_bias[i,i+1] = -self.phase_lag_body #parameters.axial_weights
                 self.phase_bias[i+1,i] = self.phase_lag_body
             self.phase_bias[i,i+self.n_body_joints] = pi # parameters.contralateral_weights
@@ -157,7 +158,7 @@ class RobotParameters(dict): # inherits from dict class
                 self.coupling_weights[i,i+1] = 10.0
                 self.coupling_weights[i+1,i] = 10.0
 
-        # Connections from limb to spine (strong) -> QUESTION: SUPPOSED TO PUT THOSE CONNECTIONS THAT PROBABLY DON'T EXIST?
+        # Connections from limb to spine (strong)
         self.coupling_weights[0:4,16] = 30.0
         self.coupling_weights[4:8,17] = 30.0
         self.coupling_weights[8:12,18] = 30.0

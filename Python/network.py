@@ -37,7 +37,6 @@ def network_ode(_time, state, robot_parameters : RobotParameters, loads, contact
 
     # Implement equation here
     dphase = np.zeros(n_oscillators) # init dphase
-    # print(n_oscillators)
     
     for i in range(n_oscillators):
         dphase[i] = 2*np.pi*freq[i]
@@ -45,8 +44,7 @@ def network_ode(_time, state, robot_parameters : RobotParameters, loads, contact
             dphase[i] += amplitudes[j]*weights[i,j]*np.sin(phases[j]-phases[i]-phi[i,j])
     
     dr = np.zeros(n_oscillators) # init dr
-    # print(np.size(amplitudes_rate))
-    # print(np.size(dr))
+
     for k in range(n_oscillators):
         dr[k] = amplitudes_rate[k]*(nominal_amplitudes[k]-amplitudes[k])
     
@@ -70,7 +68,7 @@ def motor_output(phases, amplitudes, iteration):
 
     """
     # Last 4 oscillators define output of each limb.
-    # Each limb has 2 degree of freedom
+    # Each limb has 2 degrees of freedom
     # Implement equation here
     q_body = np.zeros(8)
     for i in range(8):
@@ -149,10 +147,11 @@ class SalamandraNetwork:
         freq = self.robot_parameters.freqs
         dphase = 2*np.pi*freq
         phases = self.state.phases(iteration=iteration)
+        amplitudes = self.state.amplitudes(iteration=iteration)
         phi = self.robot_parameters.phase_bias
         weights = self.robot_parameters.coupling_weights
         for i in range(20):
             for j in range(20):
-                dphase += self.state.amplitudes(iteration=iteration)[i]*weights[i,j]*np.sin(phases[j]-phases[i]-phi[i,j])
+                dphase[i] += amplitudes[j]*weights[i,j]*np.sin(phases[j]-phases[i]-phi[i,j])
 
         return dphase

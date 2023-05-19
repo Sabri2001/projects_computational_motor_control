@@ -38,12 +38,12 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
         'DONE: Modify the scalar drive to be a vector of length n_iterations. By doing so the drive will be modified to be drive[i] at each time step i.')
     drive = [6*i/(n_iterations-1) for i in range(n_iterations)]
     state = SalamandraState.salamandra_robot(n_iterations) 
-        # initialise empty array (or rather, SalamandraState -> cf. salamndar_simulation.data.py object) 
+        # initialise empty array (or rather, SalamandraState -> cf. salamndra_simulation.data.py object) 
         # in which history of states will be written
     network = SalamandraNetwork(sim_parameters, n_iterations, state)
-    osc_left = np.arange(8) # TODO: what are those for??
-    osc_right = np.arange(8, 16)
-    osc_legs = np.arange(16, 20)
+    # osc_left = np.arange(8) -> not used
+    # osc_right = np.arange(8, 16)
+    # osc_legs = np.arange(16, 20)
 
     # Logs: initialisation
     phases_log = np.zeros([
@@ -52,10 +52,10 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
     ])
     phases_log[0, :] = network.state.phases(iteration=0)
 
-    # dphase
+    # derivative phase
     dphases_log = np.zeros([
         n_iterations,
-        20 # as only recording values for one oscillator for now
+        20
     ])
     dphases_log[0, :] = network.get_dphase(iteration=0)
 
@@ -68,7 +68,7 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
     amplitude_rates_log = np.zeros([
         n_iterations,
         len(network.state.amplitudes(iteration=0))
-    ]) # my addition, to check ampli_rates
+    ])
     
     freqs_log = np.zeros([
         n_iterations,
@@ -88,9 +88,6 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
     ])
     outputs[0, :] = network.outputs(iteration=0)
 
-    # comment below pass to run file
-    # pylog.warning('Remove the pass to run your code!!')
-    # pass
 
     pylog.warning(
         'DONE: Implement plots here, try to plot the various logged data to check the implementation')
@@ -105,6 +102,7 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
             )
         network.step(i, time0, timestep)
         phases_log[i+1, :] = network.state.phases(iteration=i+1)
+        dphases_log[i+1, :] = network.get_dphase(iteration=i+1)
         amplitudes_log[i+1, :] = network.state.amplitudes(iteration=i+1)
         amplitude_rates_log[i+1, :] = network.robot_parameters.nominal_amplitudes
         outputs_log[i+1, :] = network.get_motor_position_output(iteration=i+1)
@@ -120,7 +118,8 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
 
     # Implement plots of network results
     # pylog.warning('DONE: Implement plots')
-    # # Plotting the phases
+
+    # Plotting the phases
     # plt.figure()
     # plt.plot(times, phases_log[:, 0], label='Body phase')
     # plt.plot(times, phases_log[:, 16], label='Limb phase')
@@ -129,14 +128,14 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
     # plt.title("Phases")
     # plt.legend()
 
-    # Plotting the phase derivatives (for oscillator 16)
+    # # Plotting the phase derivatives (for oscillator 0 -> spine oscillator)
     plt.figure()
-    plt.plot(times, dphases_log[:, 16], label='Limb dphase')
+    plt.plot(times, dphases_log[:, 0], label='Limb dphase')
     plt.xlabel('Times')
     plt.ylabel('Dphase')
     plt.legend()
 
-    # Plotting the amplitudes
+    # # Plotting the amplitudes
     # plt.figure()
     # plt.plot(times, amplitudes_log[:, 0], label='Body amplitude')
     # plt.plot(times, amplitudes_log[:, 16], label='Limb amplitude')
@@ -144,7 +143,7 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
     # plt.ylabel('Amplitude')
     # plt.legend()
 
-    # # # Plotting the nominal amplitudes
+    # # # # Plotting the nominal amplitudes
     # plt.figure()
     # plt.plot(times, amplitude_rates_log[:, 0], label='Body nominal amplitude')
     # plt.plot(times, amplitude_rates_log[:, 16], label='Limb nominal amplitude')
@@ -152,19 +151,18 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
     # plt.ylabel('Nominal amplitude')
     # plt.legend()
 
-    # # Plotting the frequencies
-    # plt.figure()
-    # plt.plot(times, freqs_log[:, 0], label='Body frequency')
-    # plt.plot(times, freqs_log[:, 16], label='Limb frequency')
-    # plt.xlabel('Time')
-    # plt.ylabel('Frequency')
-    # plt.legend()
+    # # # Plotting the frequencies
+    plt.figure()
+    plt.plot(times, freqs_log[:, 0], label='Body frequency')
+    plt.plot(times, freqs_log[:, 16], label='Limb frequency')
+    plt.xlabel('Time')
+    plt.ylabel('Frequency')
+    plt.legend()
 
-    # Plotting oscillator outputs
-    # Note: artificially offset curves for visualising walking/swimming patterns
-    # Spine oscillators 0 to 7 (left side, head to tail)
+    # # Plotting oscillator outputs
+    # # Note: artificially offset curves for visualising walking/swimming patterns
     # plt.figure()
-    # plt.plot(times, outputs[:, 0],'b',label='Osc_output0')
+    # plt.plot(times, outputs[:, 0],'b',label='Osc_output0') # Spine oscillators 0 to 7 (left side, head to tail)
     # plt.plot(times, outputs[:, 1]-2,'b', label='Osc_output1')
     # plt.plot(times, outputs[:, 2]-4,'b', label='Osc_output2')
     # plt.plot(times, outputs[:, 3]-6,'b', label='Osc_output3')
@@ -172,16 +170,12 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
     # plt.plot(times, outputs[:, 5]-10,'g', label='Osc_output5')
     # plt.plot(times, outputs[:, 6]-12,'g', label='Osc_output6')
     # plt.plot(times, outputs[:, 7]-14,'g', label='Osc_output7')
-
-    # # Front limbs (left then right)
-    # plt.plot(times, outputs[:, 16]-18,'b',label='Osc_output16')
+    # plt.plot(times, outputs[:, 16]-18,'b',label='Osc_output16') # Front limbs (left then right)
     # plt.plot(times, outputs[:, 18]-20,'g', label='Osc_output18')
-
-    # TODO: adjust red/dashed lines for visualisation
-
     # plt.xlabel('Time')
     # plt.ylabel('X')
     # plt.legend()
+    # TODO: Red/dashed lines for visualisation
 
     plot_results.plot_oscillator_patterns(times, outputs, drive) # TODO plot frequencies
 
