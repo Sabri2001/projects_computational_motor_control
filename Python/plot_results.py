@@ -282,6 +282,30 @@ def power_speed_ratio(joints_torques, joints_velocities, links_positions, links_
     return power/speed
     
 
+def get_spine_angles(links_positions):
+    link_seq = [1,0,2,3,4,5,6,7,8] # fix order links (1 and 0 inverted)
+    spine_links_positions = links_positions[:,link_seq,:] # don't take z into account
+    links_vectors = -np.diff(spine_links_positions, axis=1)
+    angle_array = np.zeros([1000,7,1])
+
+    for i in range(1000):
+        for j in range(7):
+            vector1 = links_vectors[i, j, :]  # First vector of the i-th iteration
+            vector2 = links_vectors[i, j+1, :]  # Second vector of the i-th iteration
+
+            dot_product = np.dot(vector1, vector2)
+            norm_vector1 = np.linalg.norm(vector1)
+            norm_vector2 = np.linalg.norm(vector2)
+
+            cosine_angle = dot_product / (norm_vector1 * norm_vector2)
+            angle_rad = np.arccos(cosine_angle)
+            angle = np.degrees(np.arccos(cosine_angle))
+
+            angle_array[i, j, 0] = angle
+
+    return angle_array
+
+
 def main(files, plot=True):
     """Main"""
 
@@ -322,7 +346,6 @@ def main(files, plot=True):
         speed_vec.append(compute_speed(links_positions, links_vel)[0]) # only axial speed here
         power_speed_vec.append(power_speed_ratio(joints_torques, joints_velocities, links_positions, links_vel))
 
-
     # Notes:
     # For the links arrays: positions[iteration, link_id, xyz]
     # For the positions arrays: positions[iteration, xyz]
@@ -336,7 +359,19 @@ def main(files, plot=True):
     # plot_trajectory(head_positions)
     # plt.show()
 
-    # Body phase lags 
+    # Plot spine angles (from head to tail)
+    plt.figure('Spine angles')
+    spine_angles = get_spine_angles(links_positions[:,:,:2])
+    plt.plot(times, spine_angles[:,0,:])
+    plt.plot(times, spine_angles[:,1,:])
+    plt.plot(times, spine_angles[:,2,:])
+    plt.plot(times, spine_angles[:,3,:])
+    plt.plot(times, spine_angles[:,4,:])
+    plt.plot(times, spine_angles[:,5,:])
+    plt.plot(times, spine_angles[:,6,:])
+    plt.show()
+
+    # Plot body phase lags 
     # plt.figure("Oscillators")
     # plt.plot(times,osc_phases[:,0]-osc_phases[:,1]) # phase lag within first half of spine
     # plt.plot(times,osc_phases[:,3]-osc_phases[:,4]) # phase lag between first and second half of spine 
@@ -360,12 +395,12 @@ def main(files, plot=True):
     # plot_2d(results,["Drive [-]","Phase lag body [-]","Total torque [N m]"]) # param1, param2, metric
 
     # 2D plot for grid search CoT metric (NOTE: should update x/y labels + ranges)
-    param_range1 = np.linspace(3,5,4) # drive
-    param_range2 = [pi/8, 2*pi/8, 3*pi/8] # phase_lag_body
-    results = np.array([[i,j,0] for i in param_range1 for j in param_range2])
-    results[:,2] = np.array(power_speed_vec)
-    print(results)
-    plot_2d(results,["Drive [-]","Phase lag body [-]", "Power Speed Ratio [J/m]"]) # param1, param2, metric
+    # param_range1 = np.linspace(3,5,4) # drive
+    # param_range2 = [pi/8, 2*pi/8, 3*pi/8] # phase_lag_body
+    # results = np.array([[i,j,0] for i in param_range1 for j in param_range2])
+    # results[:,2] = np.array(power_speed_vec)
+    # print(results)
+    # plot_2d(results,["Drive [-]","Phase lag body [-]", "Power Speed Ratio [J/m]"]) # param1, param2, metric
 
     # Show plots
     if plot:

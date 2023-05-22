@@ -1,8 +1,10 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
-def fun():
-	return 3,4
+a = np.array([1,0])
+b = np.array([0,1])
 
-
-a = np.linalg.norm(np.array(fun()))
-print('a: ', a)
+plt.figure("test")
+plt.plot(a)
+# plt.plot(b)
+plt.show()
