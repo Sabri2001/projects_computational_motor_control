@@ -339,6 +339,10 @@ def main(files, plot=True):
         joints_velocities = np.array(data.sensors.joints.velocities_all()) # shape (1000,16)
             # Note: checked that this is relative velocity
         joints_torques = np.array(data.sensors.joints.motor_torques_all()) # shape (1000,16)
+        # Fix:
+        joints_positions[:, [1,5]] *= -1
+        joints_velocities[:, [1,5]] *= -1
+        joints_torques[:, [1,5]] *= -1
 
         # Metrics (scalar)
         # Note: use dir() to know metrics than can be applied to object
