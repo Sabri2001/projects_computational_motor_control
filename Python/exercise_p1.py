@@ -127,7 +127,7 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
     plot_results.plot_oscillator_properties(times, outputs, drive, freqs_log, amplitudes_log)
 
     # Plot radius and frequency against drive
-    plot_results.plot_drive_effects(drive, freqs_log, amplitudes_log)
+    plot_results.plot_drive_effects(drive, dphases_log, amplitude_rates_log)
 
     return
 

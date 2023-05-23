@@ -101,7 +101,7 @@ def plot_oscillator_properties(times, outputs, drive, freqs_log, amplitudes_log,
     axes[1].plot(times, freqs_log[:, 0], color='black')
     axes[1].plot(times, freqs_log[:, 16], color='black', linestyle='dashed')
     
-    axes[2].set_ylabel('r')
+    axes[2].set_ylabel('R')
     # Amplitudes
     axes[2].plot(times, amplitudes_log[:, 0],  color='black')
     axes[2].plot(times, amplitudes_log[:, 16], color='black', linestyle='dashed')
@@ -127,13 +127,13 @@ def plot_drive_effects(drive, freqs, amplitudes):
     fig, axes = plt.subplots(2, 1, figsize=(8, 8), sharex=True)
     
     # Frequencies
-    axes[0].set_ylabel('Freq [Hz]')
+    axes[0].set_ylabel('$\mu$ [Hz]')
     axes[0].plot(drive, freqs[:, 0], color='black', label='spine')
     axes[0].plot(drive, freqs[:, 16], color='black', linestyle='dashed', label='limb')
     # Add spine and limb labels
     axes[0].legend()
     
-    axes[1].set_ylabel('r')
+    axes[1].set_ylabel('R')
     # Amplitudes
     axes[1].plot(drive, amplitudes[:, 0],  color='black')
     axes[1].plot(drive, amplitudes[:, 16], color='black', linestyle='dashed')
