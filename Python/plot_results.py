@@ -294,6 +294,21 @@ def wrap_to_pi(angle):
     return angle
 
 
+def wrap_to_2pi(angle):
+    """
+    Returns equivalent angle in range 0 to 2*pi
+    """
+    while angle >= 2*pi:
+        angle -= 2*pi
+
+    while angle < 0:
+        angle += 2*pi
+    return angle
+
+
+vector_wrap_to_2pi = np.vectorize(wrap_to_2pi)
+
+
 def spine_cmd(phase,ampli):
     return ampli*(1+cos(phase))
 
@@ -302,33 +317,42 @@ def limb_cmd(phase,ampli):
     return ampli*cos(phase)-1 # -1 offset for plotting
 
 
-def plot_forces(times, link_data):
-    """Plot forces"""
-    for i, data in enumerate(link_data.T):
-        plt.plot(times, data, label=['limb 1', 'limb 2', 'limb 3', 'limb 4'][i])
-    plt.legend()
-    plt.xlabel('Time [s]')
-    plt.ylabel('Force [N]')
-    plt.grid(True)
-
-def plot_phase_vs_force(time, phases, ground_forces):
+def plot_phase_force_vs_time(times, phases, ground_forces):
     fig, axes = plt.subplots(2, 1, figsize=(8, 8), sharex=True)
     
     # Frequencies
-    axes[0].set_ylabel('Phase []')
-    axes[0].plot(time, phases, label=['limb 1', 'limb 2', 'limb 3', 'limb 4'])
+    axes[0].set_ylabel('Phase [rad]')
+    axes[0].plot(times, phases, label=['limb 1', 'limb 2', 'limb 3', 'limb 4'])
     # Add spine and limb labels
     axes[0].legend()
     
     axes[1].set_ylabel('Force [N]')
     # Amplitudes
-    axes[1].plot(time, ground_forces, label=['limb 1', 'limb 2', 'limb 3', 'limb 4'])
+    axes[1].plot(times, ground_forces, label=['limb 1', 'limb 2', 'limb 3', 'limb 4'])
     
     # Label drive axes
     axes[-1].set_xlabel('Time [s]')
 
     # Correct the layout
     plt.tight_layout()
+
+
+def plot_phase_vs_force(phases, ground_forces):
+    plt.figure()
+    # Frequencies
+    plt.ylabel('Phase [rad]')
+    plt.plot(ground_forces, phases, label=['limb 1', 'limb 2', 'limb 3', 'limb 4'])
+    # Add spine and limb labels
+    plt.legend()
+    
+    # Label drive axes
+    plt.xlabel('Grf [N]')
+
+    plt.show()
+
+
+def threshold_grf(ground_forces):
+    return np.clip(ground_forces,a_min=7,a_max=None)
 
 
 def main(files, plot=True):
@@ -368,6 +392,8 @@ def main(files, plot=True):
         joints_positions[:, [1,5]] *= -1
         joints_velocities[:, [1,5]] *= -1
         joints_torques[:, [1,5]] *= -1
+
+        ground_forces = np.array(data.sensors.contacts.array[:,0:4,2])
 
         # Metrics (scalar)
         # Note: use dir() to know metrics than can be applied to object
@@ -419,12 +445,12 @@ def main(files, plot=True):
     # plt.ylabel("Body phase lag [rad]")
 
     # 2D plot for grid search speed metric (NOTE: should update x/y labels + ranges)
-    param_range1 = np.linspace(1,3,4) 
-    param_range2 = np.linspace(-1,1,5)+pi
-    results = np.array([[i,j,0] for i in param_range1 for j in param_range2])
-    results[:,2] = np.array(speed_vec)
-    print(results)
-    plot_2d(results,["Drive [-]","Phase offset between limbs and body [rad]","Mean speed [m/s]"]) # param1, param2, metric
+    # param_range1 = np.linspace(1,3,4) 
+    # param_range2 = np.linspace(-1,1,5)+pi
+    # results = np.array([[i,j,0] for i in param_range1 for j in param_range2])
+    # results[:,2] = np.array(speed_vec)
+    # print(results)
+    # plot_2d(results,["Drive [-]","Phase offset between limbs and body [rad]","Mean speed [m/s]"]) # param1, param2, metric
     
     # # 2D plot for grid search torque metric (NOTE: should update x/y labels + ranges)
     # param_range1 = np.linspace(1,3,4)
@@ -443,8 +469,11 @@ def main(files, plot=True):
     # plot_2d(results,["Drive [-]","Phase lag body [rad]", "Power Speed Ratio [J/m]"]) # param1, param2, metric
 
     # Plot limb phases vs. ground forces
-    plt.figure('Limb phases vs. Ground forces')
-    plot_phase_vs_force(times, osc_phases[:,16:20], ground_forces)
+    # CAREFUL: limb order chosen in network not same as paper (and grf), so order shift
+    mod_osc_phases = vector_wrap_to_2pi(osc_phases[:,18]) # mod 2pi
+    filter_grf = threshold_grf(ground_forces[:,1]) # filtered (thresh 7)
+    #plot_phase_force_vs_time(times, mod_osc_phases, filter_grf)
+    plot_phase_vs_force(mod_osc_phases, filter_grf) 
     plt.show()
 
     # Show plots
@@ -455,14 +484,15 @@ def main(files, plot=True):
     
 
 if __name__ == '__main__':
-    file_names = [f'./logs/2a/simulation_{i}' for i in range(12)]
-    file_names = [f'./logs/2b/simulation_{i}' for i in range(12)]
-    file_names = [f'./logs/3a/simulation_{i}' for i in range(20)]
-    file_names = [f'./logs/3b/simulation_{i}' for i in range(28)]
-    file_names = [f'./logs/4b/simulation_{i}' for i in range(1)]
-    file_names = [f'./logs/4c/simulation_{i}' for i in range(1)]
-    file_names = [f'./logs/5a/simulation_{i}' for i in range(1)]
-    file_names = [f'./logs/5b/simulation_{i}' for i in range(1)]
-    file_names = [f'./logs/5c/simulation_{i}' for i in range(1)]
-    file_names = [f'./logs/5d/simulation_{i}' for i in range(1)]
+    # file_names = [f'./logs/2a/simulation_{i}' for i in range(12)]
+    # file_names = [f'./logs/2b/simulation_{i}' for i in range(12)]
+    # file_names = [f'./logs/3a/simulation_{i}' for i in range(20)]
+    # file_names = [f'./logs/3b/simulation_{i}' for i in range(28)]
+    # file_names = [f'./logs/4b/simulation_{i}' for i in range(1)]
+    # file_names = [f'./logs/4c/simulation_{i}' for i in range(1)]
+    # file_names = [f'./logs/5a/simulation_{i}' for i in range(1)]
+    # file_names = [f'./logs/5b/simulation_{i}' for i in range(1)]
+    # file_names = [f'./logs/5c/simulation_{i}' for i in range(1)]
+    # file_names = [f'./logs/5d/simulation_{i}' for i in range(1)]
+    file_names = [f'./logs/6a/simulation_{i}' for i in range(1)]
     main(files=file_names, plot=True)
