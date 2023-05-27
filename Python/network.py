@@ -3,6 +3,7 @@
 import numpy as np
 from scipy.integrate import ode
 from robot_parameters import RobotParameters
+from scipy.signal import lfilter
 
 
 def network_ode(_time, state, robot_parameters : RobotParameters, loads, contact_sens):
@@ -34,14 +35,12 @@ def network_ode(_time, state, robot_parameters : RobotParameters, loads, contact
     nominal_amplitudes = robot_parameters.nominal_amplitudes # R
     weights = robot_parameters.coupling_weights # w
     phi = robot_parameters.phase_bias # phi
+
+    # TEMPORARY: exo6.3
     N = np.zeros(n_oscillators)
+    N = np.clip(N,7,None)
     N[16:20] = contact_sens
-    n = 10  # the larger n is, the smoother curve will be
-    b = [1.0 / n] * n
-    a = 1
-    N_filterd = lfilter(b, a, N)
-    N_threshold = np.clip(N_filterd, 0, 7)
-    sigma = loads
+    sigma = -0.005 # paper 5
 
     # Implement equation here
     dphase = np.zeros(n_oscillators) # init dphase
@@ -49,7 +48,7 @@ def network_ode(_time, state, robot_parameters : RobotParameters, loads, contact
     for i in range(n_oscillators):
         dphase[i] = 2*np.pi*freq[i]
         for j in range(n_oscillators):
-            dphase[i] += amplitudes[j]*weights[i,j]*np.sin(phases[j]-phases[i]-phi[i,j]) + N_threshold[i]
+            dphase[i] += amplitudes[j]*weights[i,j]*np.sin(phases[j]-phases[i]-phi[i,j]) + sigma*N[i]*np.cos(phases[i])
     
     dr = np.zeros(n_oscillators) # init dr
 
