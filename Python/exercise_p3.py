@@ -9,7 +9,7 @@ import farms_pylog as pylog
 from math import pi
 
 
-def exercise_3a_coordination(timestep, gui):
+def exercise_3a_coordination(timestep, gui, save=False):
     """[Project 1] Exercise 3a Limb and Spine coordination
 
     This exercise explores how phase difference between spine and legs
@@ -22,7 +22,7 @@ def exercise_3a_coordination(timestep, gui):
     # Use exercise_example.py for reference
     parameter_set = [
         SimulationParameters(
-            duration=10,  # Simulation duration in [s]
+            duration=40,  # Simulation duration in [s]
             timestep=timestep,  # Simulation timestep in [s]
             spawn_position=[0, 0, 0.1],  # Robot position in [m]
             spawn_orientation=[0, 0, 0],  # Orientation in Euler angles [rad]
@@ -31,13 +31,13 @@ def exercise_3a_coordination(timestep, gui):
             phase_lag_body_limb = phase_lag_body_limb,
         )
         for drive in np.linspace(1, 3, 4)
-        for phase_lag_body_limb in np.linspace(-1,1,6) # cf. Salamandra II
+        for phase_lag_body_limb in np.linspace(-1,1,5)+pi # cf. Salamandra II
     ]
 
     # Grid search
-    os.makedirs('./logs/exo3a/', exist_ok=True)
+    os.makedirs('./logs/3a/', exist_ok=True)
     for simulation_i, sim_parameters in enumerate(parameter_set):
-        filename = './logs/exo3a/simulation_{}.{}'
+        filename = './logs/3a/simulation_{}.{}'
         sim, data = simulation(
             sim_parameters=sim_parameters,  # Simulation parameters, see above
             arena='land',  # Can also be 'water'
@@ -49,15 +49,15 @@ def exercise_3a_coordination(timestep, gui):
             camera_id=2  # camera type: 0=top view, 1=front view, 2=side view,
         )
         # Log robot data
-        # Uncomment if wanna save
-        data.to_file(filename.format(simulation_i, 'h5'), sim.iteration)
-        # Log simulation parameters
-        with open(filename.format(simulation_i, 'pickle'), 'wb') as param_file:
-            pickle.dump(sim_parameters, param_file)
+        if save:
+            data.to_file(filename.format(simulation_i, 'h5'), sim.iteration)
+            # Log simulation parameters
+            with open(filename.format(simulation_i, 'pickle'), 'wb') as param_file:
+                pickle.dump(sim_parameters, param_file)
     return
 
 
-def exercise_3b_coordination(timestep, gui):
+def exercise_3b_coordination(timestep, gui, save=False):
     """[Project 1] Exercise 3b Limb and Spine coordination
 
     This exercise explores how spine amplitude affects coordination.
@@ -71,13 +71,12 @@ def exercise_3b_coordination(timestep, gui):
     # Use exercise_example.py for reference
     parameter_set = [
         SimulationParameters(
-            duration=10,  # Simulation duration in [s]
+            duration=40,  # Simulation duration in [s]
             timestep=timestep,  # Simulation timestep in [s]
             spawn_position=[0, 0, 0.1],  # Robot position in [m]
             spawn_orientation=[0, 0, 0],  # Orientation in Euler angles [rad]
             drive = drive,
             phase_lag_body=2*pi/8,  # or np.zeros(n_joints) for example
-            phase_lag_body_limb = 0.0,
             spine_nominal_amplitude = amplitude,
             ampli_depends_on_drive = False
         )
@@ -86,9 +85,9 @@ def exercise_3b_coordination(timestep, gui):
     ]
 
     # Grid search
-    os.makedirs('./logs/exo3b/', exist_ok=True)
+    os.makedirs('./logs/3b/', exist_ok=True)
     for simulation_i, sim_parameters in enumerate(parameter_set):
-        filename = './logs/exo3b/simulation_{}.{}'
+        filename = './logs/3b/simulation_{}.{}'
         sim, data = simulation(
             sim_parameters=sim_parameters,  # Simulation parameters, see above
             arena='land',  # Can also be 'water'
@@ -100,14 +99,14 @@ def exercise_3b_coordination(timestep, gui):
             camera_id=2  # camera type: 0=top view, 1=front view, 2=side view,
         )
         # Log robot data
-        # Uncomment if wanna save
-        data.to_file(filename.format(simulation_i, 'h5'), sim.iteration)
-        # Log simulation parameters
-        with open(filename.format(simulation_i, 'pickle'), 'wb') as param_file:
-            pickle.dump(sim_parameters, param_file)
+        if save:
+            data.to_file(filename.format(simulation_i, 'h5'), sim.iteration)
+            # Log simulation parameters
+            with open(filename.format(simulation_i, 'pickle'), 'wb') as param_file:
+                pickle.dump(sim_parameters, param_file)
     return
 
 
 if __name__ == '__main__':
-    exercise_3a_coordination(timestep=1e-2, gui = False)
-    exercise_3b_coordination(timestep=1e-2, gui = False)
+    #exercise_3a_coordination(timestep=1e-2, gui = True, save=False)
+    exercise_3b_coordination(timestep=1e-2, gui = True, save=False)

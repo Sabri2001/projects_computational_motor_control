@@ -1,5 +1,7 @@
 """[Project1] Script to call all exercises"""
 
+# NOTE: WE NEVER USED THIS SCRIPT
+
 from farms_core import pylog
 from exercise_example import exercise_example
 from exercise_p1 import exercise_1a_networks

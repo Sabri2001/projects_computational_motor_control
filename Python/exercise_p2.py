@@ -24,28 +24,26 @@ def exercise_2a_swim(timestep, gui, save = False):
     # PERSONAL NOTES
     # phase lag: now 2pi/8 => 8 oscillators form complete S-shape, according to salamander k: 0.5 -> 1.5
     # drive: 3 to 5 => freq 0.9 to 1.3 and R 0.391 to 0.521
-    # check speed/torque 
-    # -> TODO: power/speed -> similar to cost of transport (energy/distance)
+    # check speed/torque/power-speed ratio
 
     # Parameters
     parameter_set = [
         SimulationParameters(
-            duration=10,  # Simulation duration in [s]
+            duration=40,  # Simulation duration in [s]
             timestep=timestep,  # Simulation timestep in [s]
             spawn_position=[0, 0, 0.1],  # Robot position in [m]
             spawn_orientation=[0, 0, 0],  # Orientation in Euler angles [rad]
             drive=drive,  # An example of parameter part of the grid search
             phase_lag_body=phase_lag_body,  # or np.zeros(n_joints) for example
-            phase_lag_body_limb = 0.0,
         )
         for drive in np.linspace(3, 5, 8)
         for phase_lag_body in np.linspace(pi/8, 3*pi/8, 8) #[pi/8,2*pi/8,3*pi/8]
     ]
 
     # Grid search
-    os.makedirs('./logs/exo2a/', exist_ok=True)
+    os.makedirs('./logs/2a/', exist_ok=True)
     for simulation_i, sim_parameters in enumerate(parameter_set):
-        filename = './logs/exo2a/simulation_{}.{}'
+        filename = './logs/2a/simulation_{}.{}'
         sim, data = simulation(
             sim_parameters=sim_parameters,  # Simulation parameters, see above
             arena='water',  # Can also be 'water'
@@ -81,22 +79,21 @@ def exercise_2b_walk(timestep, gui, save=False):
 
     parameter_set = [
         SimulationParameters(
-            duration=10,  # Simulation duration in [s]
+            duration=40,  # Simulation duration in [s]
             timestep=timestep,  # Simulation timestep in [s]
             spawn_position=[0, 0, 0.1],  # Robot position in [m]
             spawn_orientation=[0, 0, 0],  # Orientation in Euler angles [rad]
             drive = drive,
             phase_lag_body=phase_lag_body,  # or np.zeros(n_joints) for example
-            phase_lag_body_limb = 0.0,
         )
         for drive in np.linspace(1, 3, 8)
         for phase_lag_body in np.linspace(pi/8, 3*pi/8, 8) #[pi/8,2*pi/8,3*pi/8]
     ]
 
     # Grid search
-    os.makedirs('./logs/exo2b/', exist_ok=True)
+    os.makedirs('./logs/2b/', exist_ok=True)
     for simulation_i, sim_parameters in enumerate(parameter_set):
-        filename = './logs/exo2b/simulation_{}.{}'
+        filename = './logs/2b/simulation_{}.{}'
         sim, data = simulation(
             sim_parameters=sim_parameters,  # Simulation parameters, see above
             arena='land',  # Can also be 'water'

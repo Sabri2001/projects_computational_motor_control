@@ -31,7 +31,6 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
         drive=drive,
         amplitude_gradient=None,
         phase_lag_body=2*pi/8,
-        phase_lag_body_limb = 0.0,
         turn=None,
     )
     pylog.info(
@@ -65,7 +64,7 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
     ])
     amplitudes_log[0, :] = network.state.amplitudes(iteration=0)
 
-    amplitude_rates_log = np.zeros([
+    nominal_amplitude_log = np.zeros([
         n_iterations,
         len(network.state.amplitudes(iteration=0))
     ])
@@ -104,7 +103,7 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
         phases_log[i+1, :] = network.state.phases(iteration=i+1)
         dphases_log[i+1, :] = network.get_dphase(iteration=i+1)
         amplitudes_log[i+1, :] = network.state.amplitudes(iteration=i+1)
-        amplitude_rates_log[i+1, :] = network.robot_parameters.nominal_amplitudes
+        nominal_amplitude_log[i+1, :] = network.robot_parameters.nominal_amplitudes
         outputs_log[i+1, :] = network.get_motor_position_output(iteration=i+1)
         freqs_log[i+1, :] = network.robot_parameters.freqs
         outputs[i+1, :] = network.outputs(iteration=i+1)
@@ -124,10 +123,10 @@ def run_network(duration, update=False, drive=0, timestep=1e-2):
     plot_results.plot_oscillator_patterns(times, outputs, drive, dphases_log)
 
     # Plotting oscillator properties
-    plot_results.plot_oscillator_properties(times, outputs, drive, freqs_log, amplitudes_log)
+    plot_results.plot_oscillator_properties(times, outputs, drive, dphases_log, amplitudes_log)
 
     # Plot radius and frequency against drive
-    plot_results.plot_drive_effects(drive, dphases_log, amplitude_rates_log)
+    plot_results.plot_drive_effects(drive, freqs_log, nominal_amplitude_log)
 
     return
 

@@ -34,6 +34,14 @@ def network_ode(_time, state, robot_parameters : RobotParameters, loads, contact
     nominal_amplitudes = robot_parameters.nominal_amplitudes # R
     weights = robot_parameters.coupling_weights # w
     phi = robot_parameters.phase_bias # phi
+    N = np.zeros(n_oscillators)
+    N[16:20] = contact_sens
+    n = 10  # the larger n is, the smoother curve will be
+    b = [1.0 / n] * n
+    a = 1
+    N_filterd = lfilter(b, a, N)
+    N_threshold = np.clip(N_filterd, 0, 7)
+    sigma = loads
 
     # Implement equation here
     dphase = np.zeros(n_oscillators) # init dphase
@@ -41,7 +49,7 @@ def network_ode(_time, state, robot_parameters : RobotParameters, loads, contact
     for i in range(n_oscillators):
         dphase[i] = 2*np.pi*freq[i]
         for j in range(n_oscillators):
-            dphase[i] += amplitudes[j]*weights[i,j]*np.sin(phases[j]-phases[i]-phi[i,j])
+            dphase[i] += amplitudes[j]*weights[i,j]*np.sin(phases[j]-phases[i]-phi[i,j]) + N_threshold[i]
     
     dr = np.zeros(n_oscillators) # init dr
 
@@ -76,7 +84,7 @@ def motor_output(phases, amplitudes, iteration):
 
     q_leg = np.array([])
     
-    for i in [17,19,16,18]:
+    for i in [16,18,17,19]:
         q_leg = np.append(q_leg,amplitudes[i]*np.cos(phases[i])) # shoulder
         q_leg = np.append(q_leg,amplitudes[i]*np.sin(phases[i])) # wrist
 
@@ -122,7 +130,9 @@ class SalamandraNetwork:
     def outputs(self, iteration=None):
         """Oscillator outputs"""
         # Implement equation here 
-        output = self.state.amplitudes(iteration=iteration)*(1+np.cos(self.state.phases(iteration=iteration)))
+        output = np.zeros([20])
+        output[:16] = self.state.amplitudes(iteration=iteration)[:16]*(1+np.cos(self.state.phases(iteration=iteration)[:16]))
+        output[16:] = self.state.amplitudes(iteration=iteration)[16:]*+np.cos(self.state.phases(iteration=iteration)[16:])
         return output
 
     def get_motor_position_output(self, iteration=None):
@@ -147,4 +157,4 @@ class SalamandraNetwork:
             for j in range(20):
                 dphase[i] += amplitudes[j]*weights[i,j]*np.sin(phases[j]-phases[i]-phi[i,j])
 
-        return dphase
+        return dphase/2/np.pi

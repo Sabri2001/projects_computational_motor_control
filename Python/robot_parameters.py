@@ -92,10 +92,10 @@ class RobotParameters(dict): # inherits from dict class
 
     def set_drive(self, parameters):
         if self.transition:
-            if not self.avg_x is None and self.avg_x > 0:
-                self.drive = 4
+            if not self.avg_x is None and self.avg_x > 2.3:
+                self.drive = 5
             else:
-                self.drive = 2
+                self.drive = 3
         else:
             self.drive = parameters.drive
 
@@ -180,14 +180,14 @@ class RobotParameters(dict): # inherits from dict class
         """Set frequencies"""
         # Body oscillator
         if self.drive >= 1.0 and self.drive <= 5.0:
-            self.freqs[:self.n_oscillators_body//2] = (0.2*self.drive + 0.3)*self.turn
+            self.freqs[:self.n_oscillators_body//2] = (0.2*self.drive + 0.3)*parameters.turn
             self.freqs[self.n_oscillators_body//2:self.n_oscillators_body] = 0.2*self.drive + 0.3
         else: # saturation
             self.freqs[:self.n_oscillators_body] = 0.0 
 
         # Limb oscillator
         if self.drive >= 1.0 and self.drive <= 3.0:
-            self.freqs[self.n_oscillators_body:self.n_oscillators_body+2] = (0.2*self.drive + 0.0)*self.turn
+            self.freqs[self.n_oscillators_body:self.n_oscillators_body+2] = (0.2*self.drive + 0.0)*parameters.turn
             self.freqs[self.n_oscillators_body+2:] = 0.2*self.drive + 0.0
         else: # saturation
             self.freqs[self.n_oscillators_body:] = 0.0
@@ -198,7 +198,7 @@ class RobotParameters(dict): # inherits from dict class
         # Body oscillators
         if self.ampli_depends_on_drive:
             if self.drive >= 1.0 and self.drive <= 5.0:
-                self.nominal_amplitudes[:self.n_oscillators_body//2] = (0.065*self.drive + 0.196)*self.turn
+                self.nominal_amplitudes[:self.n_oscillators_body//2] = (0.065*self.drive + 0.196)*parameters.turn
                 self.nominal_amplitudes[self.n_oscillators_body//2:self.n_oscillators_body] = 0.065*self.drive + 0.196
             else: # saturation
                 self.nominal_amplitudes[:self.n_oscillators_body] = 0.0 
@@ -207,7 +207,7 @@ class RobotParameters(dict): # inherits from dict class
 
         # Limb oscillators -> always depend on drive
         if self.drive >= 1.0 and self.drive <= 3.0:
-            self.nominal_amplitudes[self.n_oscillators_body:self.n_oscillators_body+2] = (0.131*self.drive + 0.131)*self.turn
+            self.nominal_amplitudes[self.n_oscillators_body:self.n_oscillators_body+2] = (0.131*self.drive + 0.131)*parameters.turn
             self.nominal_amplitudes[self.n_oscillators_body+2:] = (0.131*self.drive + 0.131)
         else: # saturation
             self.nominal_amplitudes[self.n_oscillators_body:] = 0.0 

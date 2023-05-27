@@ -1,5 +1,7 @@
 """Project 1"""
 
+# NOTE: WE NEVER USED THIS SCRIPT
+
 from multiprocessing import Pool
 from farms_core import pylog
 from salamandra_simulation.parse_args import save_plots

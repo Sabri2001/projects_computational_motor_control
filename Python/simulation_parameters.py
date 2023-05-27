@@ -1,4 +1,5 @@
 """Simulation parameters"""
+from math import pi
 
 
 class SimulationParameters:
@@ -33,7 +34,7 @@ class SimulationParameters:
         # Our additions
         # exo3
         self.ampli_depends_on_drive = True
-        self.phase_lag_body_limb = 0.0
+        self.phase_lag_body_limb = pi
         self.spine_nominal_amplitude = None
         # exo4
         self.transition = False
