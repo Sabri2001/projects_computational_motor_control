@@ -6,7 +6,9 @@ import numpy as np
 import matplotlib.animation as manimation
 from salamandra_simulation.simulation import simulation
 from simulation_parameters import SimulationParameters
-# import farms_pylog
+from math import pi
+import farms_pylog as pylog
+
 
 
 def exercise_6a_phase_relation(timestep):
@@ -34,7 +36,7 @@ def exercise_6a_phase_relation(timestep):
     return
 
 
-def exercise_6b_tegotae_limbs(timestep):
+def exercise_6b_tegotae_limbs(timestep, save=True):
     """Exercise 6b - Implement tegotae feedback
     (Project 2 Question 4)
 
@@ -60,7 +62,40 @@ def exercise_6b_tegotae_limbs(timestep):
     """
 
     # Use exercise_example.py for reference
-    pass
+    # pass
+    parameter_set = [
+        SimulationParameters(
+            duration=10,  # Simulation duration in [s]
+            timestep=timestep,  # Simulation timestep in [s]
+            spawn_position=[0, 0, 0.1],  # Robot position in [m]
+            spawn_orientation=[0, 0, 0],  # Orientation in Euler angles [rad]
+            drive = 2.5,
+            phase_lag_body=2*pi/8,  # or np.zeros(n_joints) for example
+            phase_lag_body_limb = 0.0,
+        )
+    ]
+
+    # Grid search
+    os.makedirs('./logs/exo6b/', exist_ok=True)
+    for simulation_i, sim_parameters in enumerate(parameter_set):
+        filename = './logs/exo6b/simulation_{}.{}'
+        sim, data = simulation(
+            sim_parameters=sim_parameters,  # Simulation parameters, see above
+            arena='land',  # Can also be 'water'
+            fast=True,  # For fast mode (not real-time)
+            headless=True,  # For headless mode (No GUI, could be faster)
+            record=True,  # Record video
+            record_path="videos/test_video_drive_" + \
+            str(simulation_i),  # video savging path
+            camera_id=0  # camera type: 0=top view, 1=front view, 2=side view,
+        )
+        # Log robot data
+        if save:
+            data.to_file(filename.format(simulation_i, 'h5'), sim.iteration)
+            # Log simulation parameters
+            with open(filename.format(simulation_i, 'pickle'), 'wb') as param_file:
+                pickle.dump(sim_parameters, param_file)
+
     return
 
 
@@ -100,8 +135,8 @@ def exercise_6d_open_vs_closed(timestep):
 
 
 if __name__ == '__main__':
-    exercise_6a_phase_relation(timestep=1e-2)
-    exercise_6b_tegotae_limbs(timestep=1e-2)
-    exercise_6c_tegotae_spine(timestep=1e-2)
-    exercise_6d_open_vs_closed(timestep=1e-2)
+    #exercise_6a_phase_relation(timestep=1e-2)
+    exercise_6b_tegotae_limbs(timestep=1e-2, save=True)
+    #exercise_6c_tegotae_spine(timestep=1e-2)
+    #exercise_6d_open_vs_closed(timestep=1e-2)
 

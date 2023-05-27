@@ -12,7 +12,7 @@ from salamandra_simulation.parse_args import save_plots
 from salamandra_simulation.save_figures import save_figures
 from network import motor_output
 import matplotlib.colors as colors
-from math import pi
+from math import pi,cos
 
 def plot_oscillator_patterns(times, outputs, drive, freqs, vlines=[0,20,40], walk_timesteps=[16, 17], swim_timesteps=[23, 24]):
     fig, axes = plt.subplots(4, 1, figsize=(8, 8), sharex=True, height_ratios=[2, 0.5, 1, 1])
@@ -37,12 +37,12 @@ def plot_oscillator_patterns(times, outputs, drive, freqs, vlines=[0,20,40], wal
     axes[0].legend()
 
     # Plot the red line for walking
-    xs = [walk_timesteps[0], walk_timesteps[0], walk_timesteps[1], walk_timesteps[1]]
+    xs = [walk_timesteps[0]+1.07, walk_timesteps[0]+1.2, walk_timesteps[1]+1, walk_timesteps[1]+1.12]
     ys = [0.75+outputs[walk_timesteps[0], 0], 0.75+outputs[walk_timesteps[0], 3]-3*2, 0.75+outputs[walk_timesteps[1], 4]-4*2, 0.75+outputs[walk_timesteps[1], 7]-7*2]
     axes[0].plot(xs, ys, 'r')
     # Plot the red line for swimming
     ys = [0.8+outputs[swim_timesteps[0], 0], 0.8+outputs[walk_timesteps[1], 7]-7*2]
-    axes[0].plot(swim_timesteps, ys, 'r')
+    axes[0].plot([swim_timesteps[0]+0.4, swim_timesteps[1]+0.25], ys, 'r')
 
     # Limb oscillators
     axes[1].set_ylabel('x Limb')
@@ -58,7 +58,7 @@ def plot_oscillator_patterns(times, outputs, drive, freqs, vlines=[0,20,40], wal
     axes[1].axis('equal')
 
     # Frequency
-    axes[2].set_ylabel("$\\dot{\phi}$ [rad/s]")
+    axes[2].set_ylabel('$\\frac{\\dot{\\theta}}{2\\pi}$ [Hz]')
     axes[2].plot(times, freqs[:, 0], color='black', label='spine')
     axes[2].plot(times, freqs[:, 16], color='black', linestyle='dashed', label='limb')
     axes[2].legend()
@@ -96,7 +96,7 @@ def plot_oscillator_properties(times, outputs, drive, freqs_log, amplitudes_log,
     axes[0].set_yticks([])
 
     # Frequencies
-    axes[1].set_ylabel('Freq [Hz]')
+    axes[1].set_ylabel('$\\frac{\\dot{\\theta}}{2\\pi}$ [Hz]')
     # Plot both oscillators
     axes[1].plot(times, freqs_log[:, 0], color='black')
     axes[1].plot(times, freqs_log[:, 16], color='black', linestyle='dashed')
@@ -127,13 +127,13 @@ def plot_drive_effects(drive, freqs, amplitudes):
     fig, axes = plt.subplots(2, 1, figsize=(8, 8), sharex=True)
     
     # Frequencies
-    axes[0].set_ylabel('Freq [Hz]')
+    axes[0].set_ylabel('$\\nu$ [Hz]')
     axes[0].plot(drive, freqs[:, 0], color='black', label='spine')
     axes[0].plot(drive, freqs[:, 16], color='black', linestyle='dashed', label='limb')
     # Add spine and limb labels
     axes[0].legend()
     
-    axes[1].set_ylabel('r')
+    axes[1].set_ylabel('R')
     # Amplitudes
     axes[1].plot(drive, amplitudes[:, 0],  color='black')
     axes[1].plot(drive, amplitudes[:, 16], color='black', linestyle='dashed')
@@ -280,30 +280,55 @@ def power_speed_ratio(joints_torques, joints_velocities, links_positions, links_
     power = mean_power(joints_torques, joints_velocities)
     speed = np.linalg.norm(np.array(compute_speed(links_positions, links_vel))) # speed norm
     return power/speed
+
+
+def wrap_to_pi(angle):
+    """
+    Returns equivalent angle in range -pi to pi
+    """
+    while angle > 3*pi:
+        angle -= 2*pi
+
+    while angle <= -pi:
+        angle += 2*pi
+    return angle
+
+
+def spine_cmd(phase,ampli):
+    return ampli*(1+cos(phase))
+
+
+def limb_cmd(phase,ampli): 
+    return ampli*cos(phase)-1 # -1 offset for plotting
+
+
+def plot_forces(times, link_data):
+    """Plot forces"""
+    for i, data in enumerate(link_data.T):
+        plt.plot(times, data, label=['limb 1', 'limb 2', 'limb 3', 'limb 4'][i])
+    plt.legend()
+    plt.xlabel('Time [s]')
+    plt.ylabel('Force [N]')
+    plt.grid(True)
+
+def plot_phase_vs_force(time, phases, ground_forces):
+    fig, axes = plt.subplots(2, 1, figsize=(8, 8), sharex=True)
     
+    # Frequencies
+    axes[0].set_ylabel('Phase []')
+    axes[0].plot(time, phases, label=['limb 1', 'limb 2', 'limb 3', 'limb 4'])
+    # Add spine and limb labels
+    axes[0].legend()
+    
+    axes[1].set_ylabel('Force [N]')
+    # Amplitudes
+    axes[1].plot(time, ground_forces, label=['limb 1', 'limb 2', 'limb 3', 'limb 4'])
+    
+    # Label drive axes
+    axes[-1].set_xlabel('Time [s]')
 
-def get_spine_angles(links_positions):
-    link_seq = [1,0,2,3,4,5,6,7,8] # fix order links (1 and 0 inverted)
-    spine_links_positions = links_positions[:,link_seq,:] # don't take z into account
-    links_vectors = -np.diff(spine_links_positions, axis=1)
-    angle_array = np.zeros([1000,7,1])
-
-    for i in range(1000):
-        for j in range(7):
-            vector1 = links_vectors[i, j, :]  # First vector of the i-th iteration
-            vector2 = links_vectors[i, j+1, :]  # Second vector of the i-th iteration
-
-            dot_product = np.dot(vector1, vector2)
-            norm_vector1 = np.linalg.norm(vector1)
-            norm_vector2 = np.linalg.norm(vector2)
-
-            cosine_angle = dot_product / (norm_vector1 * norm_vector2)
-            angle_rad = np.arccos(cosine_angle)
-            angle = np.degrees(np.arccos(cosine_angle))
-
-            angle_array[i, j, 0] = angle
-
-    return angle_array
+    # Correct the layout
+    plt.tight_layout()
 
 
 def main(files, plot=True):
@@ -311,7 +336,7 @@ def main(files, plot=True):
 
     speed_vec  = []
     torque_vec = []
-    power_speed_vec = []
+    power_speed_vec = []   
 
     for file_name in files:
         # Load data
@@ -355,6 +380,17 @@ def main(files, plot=True):
     # For the positions arrays: positions[iteration, xyz]
     # For the joints arrays: positions[iteration, joint]
 
+    # Exo4: output commands
+    # plt.figure("Oscillators")
+    # plt.plot(times,list(map(spine_cmd,osc_phases[:,0],osc_amplitudes[:,0])), 'b', label="Spine") # phase lag within first half of spine
+    # plt.plot(times,list(map(limb_cmd,osc_phases[:,16],osc_amplitudes[:,16])), 'g', label="Limb") # phase lag within first half of spine
+    # plt.text(-3.5, spine_cmd(osc_phases[0,0],osc_amplitudes[0,0])+0.4, f'$x_{0 + 1}$', fontsize='large')
+    # plt.text(-3.5, limb_cmd(osc_phases[0,16],osc_amplitudes[0,16]), f'$x_{1 + 1}$', fontsize='large')
+    # plt.gca().yaxis.set_tick_params(labelleft=False)
+    # plt.gca().set_yticks([])
+    # plt.xlabel("Time [s]")
+    # plt.legend()
+
     # Plot Traj/Positions
     # head_positions = np.asarray(head_positions)
     # plt.figure('Positions')
@@ -363,68 +399,70 @@ def main(files, plot=True):
     # plot_trajectory(head_positions)
     # plt.show()
 
-    # Plot spine angles (from head to tail)
-    plt.figure('Spine angles')
-    spine_angles = get_spine_angles(links_positions[:,:,:2])
-    plt.plot(times, spine_angles[:,0,:])
-    plt.plot(times, spine_angles[:,1,:])
-    plt.plot(times, spine_angles[:,2,:])
-    plt.plot(times, spine_angles[:,3,:])
-    plt.plot(times, spine_angles[:,4,:])
-    plt.plot(times, spine_angles[:,5,:])
-    plt.plot(times, spine_angles[:,6,:])
-    plt.show()
-
+    # Exo5: plot spine angles
+    # plt.figure("Spine angle")
+    # plt.plot(times, joints_positions[:,0], 'b')
+    # plt.xlabel("Time [s]")
+    # plt.ylabel("Spine angle [rad]")
+        
     # Plot body phase lags 
     # plt.figure("Oscillators")
-    # plt.plot(times,osc_phases[:,0]-osc_phases[:,1]) # phase lag within first half of spine
-    # plt.plot(times,osc_phases[:,3]-osc_phases[:,4]) # phase lag between first and second half of spine 
-    # plt.plot(times,osc_phases[:,4]-osc_phases[:,5]) # phase lag within second half of spine 
-    # plt.show()
+    # plt.plot(times,list(map(wrap_to_pi,osc_phases[:,0]-osc_phases[:,1])), 'b', label="Trunk") # phase lag within first half of spine
+    # plt.plot(times,list(map(wrap_to_pi,osc_phases[:,1]-osc_phases[:,2])), 'b') # phase lag within first half of spine
+    # plt.plot(times,list(map(wrap_to_pi,osc_phases[:,2]-osc_phases[:,3])), 'b') # phase lag within first half of spine
+    # plt.plot(times,list(map(wrap_to_pi,osc_phases[:,3]-osc_phases[:,4])), 'r', label="Trunk to tail") # phase lag between first and second half of spine 
+    # plt.plot(times,list(map(wrap_to_pi,osc_phases[:,4]-osc_phases[:,5])), 'g', label="Tail") # phase lag within second half of spine 
+    # plt.plot(times,list(map(wrap_to_pi,osc_phases[:,5]-osc_phases[:,6])), 'g') # phase lag within second half of spine
+    # plt.plot(times,list(map(wrap_to_pi,osc_phases[:,6]-osc_phases[:,7])), 'g') # phase lag within second half of spine
+    # plt.legend()
+    # plt.xlabel("Time [s]")
+    # plt.ylabel("Body phase lag [rad]")
 
     # 2D plot for grid search speed metric (NOTE: should update x/y labels + ranges)
-    # param_range1 = np.linspace(1,3,4) # drive
-    # param_range2 = np.linspace(0, pi/6, )*180/pi # nominal ampli (in °)
-    # results = np.array([[i,j,0] for i in param_range1 for j in param_range2])
-    # results[:,2] = np.array(speed_vec)
-    # print(results)
-    # plot_2d(results,["Drive [-]","Nominal amplitude [°]","Mean speed [m/s]"]) # param1, param2, metric
+    param_range1 = np.linspace(1,3,4) 
+    param_range2 = np.linspace(-1,1,5)+pi
+    results = np.array([[i,j,0] for i in param_range1 for j in param_range2])
+    results[:,2] = np.array(speed_vec)
+    print(results)
+    plot_2d(results,["Drive [-]","Phase offset between limbs and body [rad]","Mean speed [m/s]"]) # param1, param2, metric
     
-    # 2D plot for grid search torque metric (NOTE: should update x/y labels + ranges)
-    # param_range1 = np.linspace(3,5,4) # drive
-    # param_range2 = [pi/8, 2*pi/8, 3*pi/8] # phase_lag_body
+    # # 2D plot for grid search torque metric (NOTE: should update x/y labels + ranges)
+    # param_range1 = np.linspace(1,3,4)
+    # param_range2 = [pi/8, 2*pi/8, 3*pi/8] 
     # results = np.array([[i,j,0] for i in param_range1 for j in param_range2])
     # results[:,2] = np.array(torque_vec)
     # print(results)
-    # plot_2d(results,["Drive [-]","Phase lag body [-]","Total torque [N m]"]) # param1, param2, metric
+    # plot_2d(results,["Drive [-]","Phase lag body [rad]","Total torque [N m]"]) # param1, param2, metric
 
-    # 2D plot for grid search CoT metric (NOTE: should update x/y labels + ranges)
-    # param_range1 = np.linspace(3,5,4) # drive
-    # param_range2 = [pi/8, 2*pi/8, 3*pi/8] # phase_lag_body
+    # # 2D plot for grid search CoT metric (NOTE: should update x/y labels + ranges)
+    # param_range1 = np.linspace(1,3,4) 
+    # param_range2 = [pi/8, 2*pi/8, 3*pi/8] 
     # results = np.array([[i,j,0] for i in param_range1 for j in param_range2])
     # results[:,2] = np.array(power_speed_vec)
     # print(results)
-    # plot_2d(results,["Drive [-]","Phase lag body [-]", "Power Speed Ratio [J/m]"]) # param1, param2, metric
+    # plot_2d(results,["Drive [-]","Phase lag body [rad]", "Power Speed Ratio [J/m]"]) # param1, param2, metric
+
+    # Plot limb phases vs. ground forces
+    plt.figure('Limb phases vs. Ground forces')
+    plot_phase_vs_force(times, osc_phases[:,16:20], ground_forces)
+    plt.show()
 
     # Show plots
     if plot:
         plt.show()
     else:
         save_figures()
-
-
-def test_2D():
-    """Test 2D grid search plot"""
-    results = np.array([[i,j*pi/8,0] for i in np.linspace(3,5,4) for j in range(1,4)])
-    results[:,2] = results[:,0] + results[:,1]
-    print(results)
-    plot_2d(results,["x","y","z"])
     
 
 if __name__ == '__main__':
-    # main(plot=save_plots()) -> that's for saving plots
-    # file_names = [f'./logs/exo2a/simulation_{i}' for i in range(12)]
-    # file_names = [f'./logs/exo2b/simulation_{i}' for i in range(12)]
-    # file_names = [f'./logs/exo3a/simulation_{i}' for i in range(24)]
-    file_names = [f'./logs/exo3b/simulation_{i}' for i in range(12)]
+    file_names = [f'./logs/2a/simulation_{i}' for i in range(12)]
+    file_names = [f'./logs/2b/simulation_{i}' for i in range(12)]
+    file_names = [f'./logs/3a/simulation_{i}' for i in range(20)]
+    file_names = [f'./logs/3b/simulation_{i}' for i in range(28)]
+    file_names = [f'./logs/4b/simulation_{i}' for i in range(1)]
+    file_names = [f'./logs/4c/simulation_{i}' for i in range(1)]
+    file_names = [f'./logs/5a/simulation_{i}' for i in range(1)]
+    file_names = [f'./logs/5b/simulation_{i}' for i in range(1)]
+    file_names = [f'./logs/5c/simulation_{i}' for i in range(1)]
+    file_names = [f'./logs/5d/simulation_{i}' for i in range(1)]
     main(files=file_names, plot=True)
