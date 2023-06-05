@@ -36,19 +36,28 @@ def network_ode(_time, state, robot_parameters : RobotParameters, loads, contact
     weights = robot_parameters.coupling_weights # w
     phi = robot_parameters.phase_bias # phi
 
-    # TEMPORARY: exo6.3
+    # exo6
     N = np.zeros(n_oscillators)
-    N = np.clip(N,7,None)
     N[16:20] = contact_sens
-    sigma = -0.005 # paper 5
+    n = 10
+    b = [1.0/n]*n
+    a = 1
+    N_filtered = lfilter(b,a,N)
+    N_filtered = np.clip(N,7,None)
+    sigma = robot_parameters.weights_contact_limb
 
     # Implement equation here
     dphase = np.zeros(n_oscillators) # init dphase
     
     for i in range(n_oscillators):
         dphase[i] = 2*np.pi*freq[i]
+        if robot_parameters.feedback and i in range(16,20):
+            # print("intrins: ", dphase[i])
+            # print("Feedback: ", sigma*N_filtered[i]*np.cos(phases[i]))
+            dphase[i] += sigma*N_filtered[i]*np.cos(phases[i])
         for j in range(n_oscillators):
-            dphase[i] += amplitudes[j]*weights[i,j]*np.sin(phases[j]-phases[i]-phi[i,j]) + sigma*N[i]*np.cos(phases[i])
+            dphase[i] += amplitudes[j]*weights[i,j]*np.sin(phases[j]-phases[i]-phi[i,j])
+
     
     dr = np.zeros(n_oscillators) # init dr
 

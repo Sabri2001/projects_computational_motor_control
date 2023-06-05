@@ -52,6 +52,13 @@ class RobotParameters(dict): # inherits from dict class
         self.transition = parameters.transition
         # exo5
         self.turn = parameters.turn
+        # exo6
+        self.feedback = parameters.feedback # True => consider feedback in network equations
+        self.weights_body2body = parameters.weights_body2body
+        self.weights_limb2body = parameters.weights_limb2body
+        self.weights_limb2limb = parameters.weights_limb2limb
+        self.weights_contact_limb = parameters.weights_contact_limb
+
 
         self.update(parameters)
 
@@ -143,37 +150,37 @@ class RobotParameters(dict): # inherits from dict class
         # Body oscillators, left side
         for i in range(int(self.n_oscillators_body/2)):
             if i != self.n_oscillators_body/2-1: # not at the end of the spinal cord
-                self.coupling_weights[i,i+1] = 10.0 #parameters.axial_weights
-                self.coupling_weights[i+1,i] = 10.0
-            self.coupling_weights[i,i+self.n_body_joints] = 10.0 # parameters.contralateral_weights
-            self.coupling_weights[i+self.n_body_joints,i] = 10.0 
+                self.coupling_weights[i,i+1] = self.weights_body2body #parameters.axial_weights
+                self.coupling_weights[i+1,i] = self.weights_body2body
+            self.coupling_weights[i,i+self.n_body_joints] = self.weights_body2body # parameters.contralateral_weights
+            self.coupling_weights[i+self.n_body_joints,i] = self.weights_body2body
 
         # Body oscillators, right side
         for i in range(int(self.n_oscillators_body/2), self.n_oscillators_body):
             if i != self.n_oscillators_body-1: # not at the end of the spinal cord
-                self.coupling_weights[i,i+1] = 10.0
-                self.coupling_weights[i+1,i] = 10.0
+                self.coupling_weights[i,i+1] = self.weights_body2body
+                self.coupling_weights[i+1,i] = self.weights_body2body
 
         # Limb oscillators, left side
         for i in range(self.n_oscillators_body, int(self.n_oscillators_body+self.n_legs_joints/2)):
             if i != self.n_oscillators_body+self.n_legs_joints/2-1:
-                self.coupling_weights[i,i+1] = 10.0
-                self.coupling_weights[i+1,i] = 10.0
-            self.coupling_weights[i,int(i+self.n_legs_joints/2)] = 10.0
-            self.coupling_weights[int(i+self.n_legs_joints/2),i] = 10.0
+                self.coupling_weights[i,i+1] = self.weights_limb2limb
+                self.coupling_weights[i+1,i] = self.weights_limb2limb
+            self.coupling_weights[i,int(i+self.n_legs_joints/2)] = self.weights_limb2limb
+            self.coupling_weights[int(i+self.n_legs_joints/2),i] = self.weights_limb2limb
 
 
         # Limb oscillators, right side
         for i in range(int(self.n_oscillators_body+self.n_legs_joints/2), self.n_oscillators):
             if i != self.n_oscillators-1:
-                self.coupling_weights[i,i+1] = 10.0
-                self.coupling_weights[i+1,i] = 10.0
+                self.coupling_weights[i,i+1] = self.weights_limb2limb
+                self.coupling_weights[i+1,i] = self.weights_limb2limb
 
         # Connections from limb to spine (strong)
-        self.coupling_weights[0:4,16] = 30.0
-        self.coupling_weights[4:8,17] = 30.0
-        self.coupling_weights[8:12,18] = 30.0
-        self.coupling_weights[12:16,19] = 30.0
+        self.coupling_weights[0:4,16] = self.weights_limb2body
+        self.coupling_weights[4:8,17] = self.weights_limb2body
+        self.coupling_weights[8:12,18] = self.weights_limb2body
+        self.coupling_weights[12:16,19] = self.weights_limb2body
 
 
     def set_frequencies(self, parameters):

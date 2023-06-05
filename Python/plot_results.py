@@ -306,15 +306,12 @@ def wrap_to_2pi(angle):
     return angle
 
 
-vector_wrap_to_2pi = np.vectorize(wrap_to_2pi)
-
-
 def spine_cmd(phase,ampli):
     return ampli*(1+cos(phase))
 
 
 def limb_cmd(phase,ampli): 
-    return ampli*cos(phase)-1 # -1 offset for plotting
+    return ampli*cos(phase)
 
 
 def plot_phase_force_vs_time(times, phases, ground_forces):
@@ -408,14 +405,34 @@ def main(files, plot=True):
 
     # Exo4: output commands
     # plt.figure("Oscillators")
-    # plt.plot(times,list(map(spine_cmd,osc_phases[:,0],osc_amplitudes[:,0])), 'b', label="Spine") # phase lag within first half of spine
-    # plt.plot(times,list(map(limb_cmd,osc_phases[:,16],osc_amplitudes[:,16])), 'g', label="Limb") # phase lag within first half of spine
+    # plt.plot(times,list(map(spine_cmd,osc_phases[:,0],osc_amplitudes[:,0])), 'b', label="Spine")
+    # plt.plot(times,list(map(limb_cmd,osc_phases[:,16],osc_amplitudes[:,16])), 'g', label="Limb") 
     # plt.text(-3.5, spine_cmd(osc_phases[0,0],osc_amplitudes[0,0])+0.4, f'$x_{0 + 1}$', fontsize='large')
     # plt.text(-3.5, limb_cmd(osc_phases[0,16],osc_amplitudes[0,16]), f'$x_{1 + 1}$', fontsize='large')
     # plt.gca().yaxis.set_tick_params(labelleft=False)
     # plt.gca().set_yticks([])
     # plt.xlabel("Time [s]")
     # plt.legend()
+
+    # Exo6.4: limb output commands
+    # plt.figure("Oscillator outputs")
+    # plt.plot(times,list(map(limb_cmd,osc_phases[:,16],osc_amplitudes[:,16])), 'b', label="Front left limb") 
+    # plt.plot(times,list(map(limb_cmd,osc_phases[:,17],osc_amplitudes[:,17])), 'g', label="Front right limb") 
+    # plt.plot(times,list(map(limb_cmd,osc_phases[:,18],osc_amplitudes[:,18])), 'g--', label="Back left limb") 
+    # plt.plot(times,list(map(limb_cmd,osc_phases[:,19],osc_amplitudes[:,19])), 'b--', label="Back right limb") 
+    # plt.plot(times,list(map(spine_cmd,osc_phases[:,0],osc_amplitudes[:,0])), 'm', label="Front spine") 
+    # plt.plot(times,list(map(spine_cmd,osc_phases[:,4],osc_amplitudes[:,4])), 'm--', label="Back spine") 
+    # plt.xlabel("Time [s]")
+    # plt.ylabel("Oscillator output [-]")
+    # plt.legend()
+
+    # # Exo6.4: Mean speed
+    # print("Speed: ", compute_speed(links_positions, links_vel)[0]) # only interested in axial speed here
+    plt.figure("Mean speed")
+    sigmas = [-0.6, -0.5, -0.4, -0.3, -0.2, -0.1, -0.05, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
+    plt.plot(sigmas, speed_vec)
+    plt.xlabel("Sigma [Hz/N]")
+    plt.ylabel("Mean Speed [m/s]")
 
     # Plot Traj/Positions
     # head_positions = np.asarray(head_positions)
@@ -470,11 +487,11 @@ def main(files, plot=True):
 
     # Plot limb phases vs. ground forces
     # CAREFUL: limb order chosen in network not same as paper (and grf), so order shift
-    mod_osc_phases = vector_wrap_to_2pi(osc_phases[:,18]) # mod 2pi
-    filter_grf = threshold_grf(ground_forces[:,1]) # filtered (thresh 7)
-    #plot_phase_force_vs_time(times, mod_osc_phases, filter_grf)
-    plot_phase_vs_force(mod_osc_phases, filter_grf) 
-    plt.show()
+    # mod_osc_phases = vector_wrap_to_2pi(osc_phases[:,18]) # mod 2pi
+    # filter_grf = threshold_grf(ground_forces[:,1]) # filtered (thresh 7)
+    # plot_phase_force_vs_time(times, mod_osc_phases, filter_grf)
+    # plot_phase_vs_force(mod_osc_phases, filter_grf) 
+    # plt.show()
 
     # Show plots
     if plot:
@@ -494,5 +511,12 @@ if __name__ == '__main__':
     # file_names = [f'./logs/5b/simulation_{i}' for i in range(1)]
     # file_names = [f'./logs/5c/simulation_{i}' for i in range(1)]
     # file_names = [f'./logs/5d/simulation_{i}' for i in range(1)]
-    file_names = [f'./logs/6a/simulation_{i}' for i in range(1)]
+    file_names = [f'./logs/6b/simulation_{i}' for i in range(14)]
+    # file_names = [f'./logs/6c1/simulation_{i}' for i in range(1)]
+    # file_names = [f'./logs/6c2/simulation_{i}' for i in range(1)]
+    # file_names = [f'./logs/6c3/simulation_{i}' for i in range(1)]
+    # file_names = [f'./logs/6d1/simulation_{i}' for i in range(1)]
+    # file_names = [f'./logs/6d2/simulation_{i}' for i in range(1)]
+    # file_names = [f'./logs/6d3/simulation_{i}' for i in range(1)]
+    # file_names = [f'./logs/6d4/simulation_{i}' for i in range(1)]
     main(files=file_names, plot=True)
