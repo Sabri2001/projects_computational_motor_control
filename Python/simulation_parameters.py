@@ -16,8 +16,6 @@ class SimulationParameters:
         self.position_limb_gain = 1  # default do not change
         self.phase_lag_body = None
         self.amplitude_gradient = None
-        # Feel free to add more parameters (ex: MLR drive)
-        # self.drive_mlr = ...
 
         # Disruptions
         self.set_seed = False
@@ -25,11 +23,6 @@ class SimulationParameters:
         self.n_disruption_couplings = 0
         self.n_disruption_oscillators = 0
         self.n_disruption_sensors = 0
-
-        # Tegotae
-        self.weights_contact_body = 0.0
-        self.weights_contact_limb_i = 0.0
-        self.weights_contact_limb_c = 0.0
 
         # Our additions
         # exo3
@@ -40,6 +33,12 @@ class SimulationParameters:
         self.transition = False
         # exo5
         self.turn = 1
+        # exo6
+        self.feedback = False
+        self.weights_body2body = 10
+        self.weights_limb2body = 30
+        self.weights_limb2limb = 10
+        self.weights_contact_limb = 0
 
         # Update object with provided keyword arguments
         # NOTE: This overrides the previous declarations
