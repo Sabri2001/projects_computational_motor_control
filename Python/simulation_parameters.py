@@ -24,6 +24,11 @@ class SimulationParameters:
         self.n_disruption_oscillators = 0
         self.n_disruption_sensors = 0
 
+        # Tegotae
+        self.weights_contact_body = 0.0
+        self.weights_contact_limb_i = 0.0
+        self.weights_contact_limb_c = 0.0
+
         # Our additions
         # exo3
         self.ampli_depends_on_drive = True

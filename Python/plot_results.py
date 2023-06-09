@@ -13,6 +13,7 @@ from salamandra_simulation.save_figures import save_figures
 from network import motor_output
 import matplotlib.colors as colors
 from math import pi,cos
+from scipy.signal import lfilter
 
 def plot_oscillator_patterns(times, outputs, drive, freqs, vlines=[0,20,40], walk_timesteps=[16, 17], swim_timesteps=[23, 24]):
     fig, axes = plt.subplots(4, 1, figsize=(8, 8), sharex=True, height_ratios=[2, 0.5, 1, 1])
@@ -344,6 +345,9 @@ def wrap_to_2pi(angle):
     return angle
 
 
+vector_wrap_to_2pi = np.vectorize(wrap_to_2pi)
+
+
 def spine_cmd(phase,ampli):
     return ampli*(1+cos(phase)) + 1
 
@@ -373,17 +377,47 @@ def plot_phase_force_vs_time(times, phases, ground_forces):
 
 
 def plot_phase_vs_force(phases, ground_forces):
-    plt.figure()
-    # Frequencies
-    plt.ylabel('Phase [rad]')
-    plt.plot(ground_forces, phases, label=['limb 1', 'limb 2', 'limb 3', 'limb 4'])
-    # Add spine and limb labels
-    plt.legend()
-    
-    # Label drive axes
-    plt.xlabel('Grf [N]')
+    fig, axes = plt.subplots(4, 1, figsize=(8, 8), sharex=True)
 
-    plt.show()
+    n = 10  # the larger n is, the smoother curve will be
+    b = [1.0 / n] * n
+    a = 1
+    # Limb 1
+    mod_osc_phases1 = vector_wrap_to_2pi(phases[:,16]) # mod 2pi    
+    N1 = lfilter(b, a, ground_forces[:,0])
+    filter_grf1 = threshold_grf(N1) # filtered (thresh 7)
+    axes[0].set_ylabel('Force N_1 [N]')
+    axes[0].scatter(mod_osc_phases1, filter_grf1, s=2, label='limb 1')
+    axes[0].legend()
+    
+    # Limb 2
+    mod_osc_phases2 = vector_wrap_to_2pi(phases[:,18]) # mod 2pi
+    N2 = lfilter(b, a, ground_forces[:,1])
+    filter_grf2 = threshold_grf(N2) # filtered (thresh 7)    axes[1].set_ylabel('Force N_2 [N]')
+    axes[1].scatter(mod_osc_phases2, filter_grf2, s=2, label='limb 2')
+    axes[1].legend()
+
+    # Limb 3
+    mod_osc_phases3 = vector_wrap_to_2pi(phases[:,17]) # mod 2pi
+    N3 = lfilter(b, a, ground_forces[:,2])
+    filter_grf3 = threshold_grf(N3)
+    axes[2].set_ylabel('Force N_3 [N]')
+    axes[2].scatter(mod_osc_phases3, filter_grf3, s=2, label='limb 3')
+    axes[2].legend()
+
+    # Limb 4
+    mod_osc_phases4 = vector_wrap_to_2pi(phases[:,19]) # mod 2pi
+    N4 = lfilter(b, a, ground_forces[:,3])
+    filter_grf4 = threshold_grf(N4)
+    axes[3].set_ylabel('Force N_4 [N]')
+    axes[3].scatter(mod_osc_phases4, filter_grf4, s=2, label='limb 4')
+    axes[3].legend()
+
+    # Label drive axes
+    axes[-1].set_xlabel('Phase [rad]')
+
+    # Correct the layout
+    plt.tight_layout()
 
 
 def threshold_grf(ground_forces):
@@ -436,7 +470,6 @@ def main(files, plot=True):
         with open(file_name+'.pickle', 'rb') as param_file:
             parameters = pickle.load(param_file)
         timestep = data.timestep
-        print(data)
         n_iterations = np.shape(data.sensors.links.array)[0]
         times = np.arange(
             start=0,
@@ -585,6 +618,7 @@ if __name__ == '__main__':
     # file_names = [f'./logs/5b/simulation_{i}' for i in range(1)]
     # file_names = [f'./logs/5c/simulation_{i}' for i in range(1)]
     # file_names = [f'./logs/5d/simulation_{i}' for i in range(1)]
+    # file_names = [f'./logs/6a/simulation_{i}' for i in range(1)]
     # file_names = [f'./logs/6b/simulation_{i}' for i in range(14)]
     # file_names = [f'./logs/6c1/simulation_{i}' for i in range(1)]
     # file_names = [f'./logs/6c2/simulation_{i}' for i in range(1)]
