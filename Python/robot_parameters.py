@@ -48,8 +48,10 @@ class RobotParameters(dict): # inherits from dict class
         # exo4:
         self.drive = parameters.drive
         self.avg_x = None # approx position robot's center of mass
+        self.ground_forces = None # ground reaction forces
         self.parameters = parameters
         self.transition = parameters.transition
+        self.force_transition = parameters.force_transition
         # exo5
         self.turn = parameters.turn
         # exo6
@@ -92,6 +94,7 @@ class RobotParameters(dict): # inherits from dict class
             salamandra_data.sensors.links.urdf_positions()[iteration, :9],
         )
         self.avg_x = np.mean(gps[:, 0])
+        self.ground_forces = np.array(salamandra_data.sensors.contacts.array[iteration,0:4,2])
         self.update(self.parameters) 
         # print("GPGS: {}".format(self.gps[:, 0]))
         # print("drive: {}".format(self.sim_parameters.drive))
@@ -103,6 +106,11 @@ class RobotParameters(dict): # inherits from dict class
                 self.drive = 5
             else:
                 self.drive = 3
+        elif self.force_transition and self.ground_forces is not None:
+            if np.any(self.ground_forces > 0):
+                self.drive = 3
+            else:
+                self.drive = 5
         else:
             self.drive = parameters.drive
 

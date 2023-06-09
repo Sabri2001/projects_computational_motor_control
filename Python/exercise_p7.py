@@ -12,14 +12,27 @@ from math import pi
 def exercise_7_transition(timestep, record=False, save=False, gui=False):
     # Parameters
     parameter_set = [
+        # Water to land
         SimulationParameters(
             duration=30,  # Simulation duration in [s]
             timestep=timestep,  # Simulation timestep in [s]
-            spawn_position=[3, 0.0, 0.2],  # Robot position in [m]
+            spawn_position=[4, 0.0, 0.2],  # Robot position in [m]
                 # note: get into water at x = 0 m
             spawn_orientation=[0, 0, -pi/2],  # Orientation in Euler angles [rad]
             drive = 2,
             phase_lag_body=2*pi/8,  # or np.zeros(n_joints) for example
+            force_transition=True, # transition using ground reaction forces
+        ),
+        # Land to water
+        SimulationParameters(
+            duration=30,  # Simulation duration in [s]
+            timestep=timestep,  # Simulation timestep in [s]
+            spawn_position=[-1, 0.0, 0.0],  # Robot position in [m]
+                # note: get into water at x = 0 m
+            spawn_orientation=[0, 0, pi/2],  # Orientation in Euler angles [rad]
+            drive = 2,
+            phase_lag_body=2*pi/8,  # or np.zeros(n_joints) for example
+            force_transition=True, # transition using ground reaction forces
         )
     ]
 
@@ -47,4 +60,4 @@ def exercise_7_transition(timestep, record=False, save=False, gui=False):
 
 
 if __name__ == '__main__':
-    exercise_7_transition(timestep=1e-2, record=True, save=False, gui=True)
+    exercise_7_transition(timestep=1e-2, record=False, save=True, gui=True)

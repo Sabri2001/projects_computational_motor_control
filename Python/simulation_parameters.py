@@ -39,6 +39,8 @@ class SimulationParameters:
         self.weights_limb2body = 30
         self.weights_limb2limb = 10
         self.weights_contact_limb = 0
+        # exo7
+        self.force_transition = False
 
         # Update object with provided keyword arguments
         # NOTE: This overrides the previous declarations

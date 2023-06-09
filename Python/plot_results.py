@@ -345,7 +345,7 @@ def wrap_to_2pi(angle):
 
 
 def spine_cmd(phase,ampli):
-    return ampli*(1+cos(phase))
+    return ampli*(1+cos(phase)) + 1
 
 
 def limb_cmd(phase,ampli): 
@@ -389,13 +389,46 @@ def plot_phase_vs_force(phases, ground_forces):
 def threshold_grf(ground_forces):
     return np.clip(ground_forces,a_min=7,a_max=None)
 
+def plot_ground_reaction_forces(x_position, ground_forces, osc_phases, osc_amplitudes):
+    max_forces = np.max(ground_forces, axis=1)
+    land_start = max_forces[0] != 0
+    if land_start:
+        max_forces = reversed(max_forces)
+    for i, force in enumerate(max_forces):
+        if force != 0:
+            index = i
+            break
+    if land_start: # started on land
+        transition = x_position[-index]
+    else:
+        transition = x_position[index]
+    
+    plt.figure("Ground reaction forces")
+    plt.plot(x_position, ground_forces, label=['Limb 1', 'Limb 2', 'Limb 3', 'Limb 4'])
+    plt.axvline(x=transition, color="y", label="Transition")
+    plt.ylim(top=90)
+    plt.xlabel("x [m]")
+    plt.ylabel("Force [N]")
+    plt.legend()
+
+    plt.figure("Oscillators")
+    plt.plot(x_position,list(map(spine_cmd,osc_phases[:,0],osc_amplitudes[:,0])), 'b', label="Spine")
+    plt.plot(x_position,list(map(limb_cmd,osc_phases[:,16],osc_amplitudes[:,16])), 'g', label="Limb") 
+    plt.text(np.min(x_position) - .7, spine_cmd(osc_phases[0,0],osc_amplitudes[0,0])+0.4, f'$x_{0 + 1}$', fontsize='large')
+    plt.text(np.min(x_position) - .7, limb_cmd(osc_phases[0,16],osc_amplitudes[0,16]), f'$x_{1 + 1}$', fontsize='large')
+    plt.gca().yaxis.set_tick_params(labelleft=False)
+    plt.gca().set_yticks([])
+    plt.axvline(x=transition, color="y", label="Transition")
+    plt.xlabel("x [m]")
+    plt.legend()
+    plt.tight_layout()
 
 def main(files, plot=True):
     """Main"""
 
     speed_vec  = []
     torque_vec = []
-    power_speed_vec = []   
+    power_speed_vec = []
 
     for file_name in files:
         # Load data
@@ -403,6 +436,7 @@ def main(files, plot=True):
         with open(file_name+'.pickle', 'rb') as param_file:
             parameters = pickle.load(param_file)
         timestep = data.timestep
+        print(data)
         n_iterations = np.shape(data.sensors.links.array)[0]
         times = np.arange(
             start=0,
@@ -466,11 +500,11 @@ def main(files, plot=True):
 
     # # Exo6.4: Mean speed
     # print("Speed: ", compute_speed(links_positions, links_vel)[0]) # only interested in axial speed here
-    plt.figure("Mean speed")
-    sigmas = [-0.6, -0.5, -0.4, -0.3, -0.2, -0.1, -0.05, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
-    plt.plot(sigmas, speed_vec)
-    plt.xlabel("Sigma [Hz/N]")
-    plt.ylabel("Mean Speed [m/s]")
+    # plt.figure("Mean speed")
+    # sigmas = [-0.6, -0.5, -0.4, -0.3, -0.2, -0.1, -0.05, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
+    # plt.plot(sigmas, speed_vec)
+    # plt.xlabel("Sigma [Hz/N]")
+    # plt.ylabel("Mean Speed [m/s]")
 
     # Plot Traj/Positions
     # head_positions = np.asarray(head_positions)
@@ -531,6 +565,8 @@ def main(files, plot=True):
     # plot_phase_vs_force(mod_osc_phases, filter_grf) 
     # plt.show()
 
+    plot_ground_reaction_forces(head_positions[:, 0], ground_forces, osc_phases, osc_amplitudes)
+
     # Show plots
     if plot:
         plt.show()
@@ -549,7 +585,7 @@ if __name__ == '__main__':
     # file_names = [f'./logs/5b/simulation_{i}' for i in range(1)]
     # file_names = [f'./logs/5c/simulation_{i}' for i in range(1)]
     # file_names = [f'./logs/5d/simulation_{i}' for i in range(1)]
-    file_names = [f'./logs/6b/simulation_{i}' for i in range(14)]
+    # file_names = [f'./logs/6b/simulation_{i}' for i in range(14)]
     # file_names = [f'./logs/6c1/simulation_{i}' for i in range(1)]
     # file_names = [f'./logs/6c2/simulation_{i}' for i in range(1)]
     # file_names = [f'./logs/6c3/simulation_{i}' for i in range(1)]
@@ -557,4 +593,7 @@ if __name__ == '__main__':
     # file_names = [f'./logs/6d2/simulation_{i}' for i in range(1)]
     # file_names = [f'./logs/6d3/simulation_{i}' for i in range(1)]
     # file_names = [f'./logs/6d4/simulation_{i}' for i in range(1)]
+    file_names = ['./logs/7/simulation_0']
+    main(files=file_names, plot=True)
+    file_names = ['./logs/7/simulation_1']
     main(files=file_names, plot=True)
